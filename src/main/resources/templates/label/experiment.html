@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>实验</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="/css/bootstrap.min.css"/>
+    <style>
+        body{
+            background-color: #eeeeee;
+        }
+        .login_middle{
+
+            margin-top: 130px;
+            border-top: 1px gainsboro solid;
+        }
+        .song_label{
+            margin-top: 5px;
+        }
+        .dimension{
+            margin-top: 5px;
+        }
+        .label-show{
+            margin-left: 5px;
+            margin-top: 5px;
+        }
+        .btn-info{
+            background-color: #adadad;
+            border-color: #adadad;
+        }
+        .label_ul{
+            margin-top:10px;
+            /*float: left;*/
+            /*height: 500px;*/
+            overflow-y: auto;
+            list-style-type: none;
+            padding-left: 5px;
+            padding-right: 5px;
+            border-left: 1px solid #d5d5d5;
+
+        }
+        .dm_btn{
+            padding: 3px 5px 3px 5px;
+            font-weight: 100;
+            font-size: 11px;
+            background-color: #eeeeee;
+            border-color: #eeeeee;
+            color: #0f0f0f;
+        }
+        .label_btn{
+            padding: 3px 5px 3px 5px;
+            font-weight: 100;
+            background-color: #adadad;
+            border-color: #adadad;
+            font-size: 10px;
+        }
+        .type_btn{
+            padding: 3px 5px 3px 5px;
+            font-weight: 100;
+            font-size: 11px;
+            background-color: #8c8c8c;
+            border-color: #8c8c8c;
+        }
+        .btn-show{
+            font-size: 11px;
+            font-weight: 100;
+            padding: 3px 5px 3px 5px;
+        }
+        .label_ul>li{
+            text-align: left;
+            margin: 0 auto;
+            margin-top: 5px;
+            margin-left: 5px;
+            float: left;
+        }
+        .label_btn{
+            padding: 3px 5px 3px 5px;
+            font-weight: 100;
+            background-color: #adadad;
+            border-color: #adadad;
+            font-size: 10px;
+        }
+        .label_btn_selected{
+            padding: 3px 5px 3px 5px;
+            font-weight: 100;
+            background-color: #5cb85c;
+            border-color: #5cb85c;
+            font-size: 10px;
+        }
+        .initLabel{
+            font-size: 11px;
+            font-weight: 100;
+            padding: 3px 5px 3px 5px;
+            margin-top: 5px;
+            margin-left: 5px;
+        }
+        .login_head{
+            /*height: 20%;*/
+            position: fixed;
+            background-color: #eeeeee;
+            padding-bottom: 5px;
+            border-bottom: 1px #d5d5d5 solid;
+            width: 100%;
+            height: 130px;
+        }
+        .type-line{
+            clear: left;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row login_head">
+        <div class="row" style="margin-left: 5px; margin-top: 5px; width: 100%;">
+            <div class="col-md-8">
+                <h5>请选择标签（可多选）</h5>
+            </div>
+            <div class="col-md-4" >
+                <button type="button" class="btn btn-primary label-btn btn-show" style="margin-top: 5px;" >查看结果</button>
+            </div>
+        </div>
+        <div class="row" style="margin-left: 5px; margin-top: 5px; width: 100%;" id="labelShow">
+        </div>
+    </div>
+
+    <div class="row login_middle">
+
+    </div>
+
+</div>
+<script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
+<script th:src="@{/js/bootstrap.min.js}" src="/js/bootstrap.min.js" ></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    (function($){
+        $(function(){
+            var $_row_middle = $(".login_middle");
+            var song_label_ids = new Array();
+            function handlerLabel(label, ul){
+                var songList = label.sonLabels;
+                if(songList != null && songList.length > 0){
+                    var $_songLabel = $("<li/>").addClass("type-line");
+                    var $_songLabel_a = $("<a/>").attr("type","button").attr("class","btn btn-info type_btn").attr("value",label.id).html(label.labelName);
+                    var $_div_line = $("<div/>").attr("class","type-line");
+                    $_songLabel.append($_div_line).append($_songLabel_a);
+                    ul.append($_songLabel);
+                    $.each(songList,function(i, e){
+                        handlerLabel(e, ul);
+                    });
+                }else{
+                    var $_songLabel = $("<li/>");
+                    var $_songLabel_a = $("<a/>").attr("type","button").attr("class","btn btn-info label_btn").attr("value", label.id).html(label.labelName);
+                    $_songLabel.append($_songLabel_a);
+                    ul.append($_songLabel);
+                    return;
+                }
+            }
+            $.ajax({
+                type : "GET",
+                url : "/label/all",
+                success : function(data){
+                    $.each(data, function(i , e){
+                        var $_ul = $("<ul/>").attr("class","label_ul");
+                        var $_li = $("<li/>");
+                        var $_btn = $("<button/>").attr("type", "button").attr("class","btn btn-warning btn-lg dm_btn").html(e.labelName);
+                        $_li.append($_btn);
+                        $_ul.append($_li);
+                        $_row_middle.append($_ul);
+                        var sonList = e.sonLabels;
+                        $.each(sonList, function(j, ele){
+                            handlerLabel(ele, $_ul);
+                        });
+                    });
+
+                    $(".label_btn,.label_btn_selected").on("click",function(){
+                        if($(this).hasClass("label_btn")){
+                            $(this).removeClass("label_btn")
+                            $(this).addClass("label_btn_selected");
+                            var $_btn_label = $("<a/>").attr("class","btn btn-success initLabel").attr("value",$(this).attr("value")).html($(this).html());
+                            $("#labelShow").append($_btn_label);
+                            song_label_ids.push($(this).attr("value"));
+                            console.log(song_label_ids);
+                        }else if($(this).hasClass("label_btn_selected")){
+                            $(this).removeClass("label_btn_selected")
+                            $(this).addClass("label_btn");
+                            $("#labelShow > a[value='" + $(this).attr("value") + "']").remove();
+                            song_label_ids.splice(jQuery.inArray($(this).attr("value"),song_label_ids),1);
+                            console.log(song_label_ids);
+                        }
+                    });
+
+
+                }
+            });
+
+            $(".label-btn").on("click", function(){
+                if(song_label_ids.length < 1){
+                    alert("请至少选择一个标签");
+                    return;
+                }
+                var labelsStr = "";
+                $.each(song_label_ids,function(i,e){
+                    labelsStr += (e + "_");
+                });
+                window.location.href = "/song/labels/list/" + labelsStr + "/" + 1;
+            });
+        });
+    })(jQuery);
+    /*]]>*/
+</script>
+</body>
+</html>

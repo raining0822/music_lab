@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Lava音乐实验室</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="/css/bootstrap.min.css"/>
+    <style>
+        body{
+            background-color: #eeeeee;
+        }
+        .login_head{
+            /*height: 20%;*/
+            margin-top: 10px;
+            margin-left: 5px;
+        }
+        .login_middle{
+            /*text-align: center;*/
+            margin-top: 10px;
+            border-top: 1px black solid;
+        }
+        .song_label{
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row login_head">
+        <div class="row btn-group btn-group-lg" role="group" style="width: 90%;" aria-label="...">
+            <div class="col-md-11">
+                <button type="button" class="btn btn-default" th:text="${song.songId}">001</button>
+                <button type="button" class="btn btn-default" th:text="${song.songName}">流年</button>
+                <button type="button" class="btn btn-default" th:text="${song.artistName}">王菲</button>
+                <button type="button" class="btn btn-default" id="songPlay" th:value="${song.id}" >播放</button>
+                <input type="hidden" name="songIdHid" id="songIdHid" th:value="${song.id}" />
+            </div>
+            <div class="col-md-1">
+                <a th:href="@{'/song/list/' + ${pageNo}}" href="/song/list/" type="button" class="btn btn-primary">返回列表</a>
+            </div>
+        </div>
+        <div class="row" style="margin-left: 5px; margin-top: 5px;">
+            <a type="button" class="btn btn-success song_label song_label_id" th:each="label : ${labelList}" th:text="${label.labelName}" th:value="${label.Id}" th:href="@{'/song/label/del/' + ${song.id} + '/' + ${label.id} + '/' + ${pageNo}}"></a>
+            <input type="hidden" name="songLabelIds" id="songLabelIds"/>
+        </div>
+    </div>
+    <div class="row login_middle">
+        <div class="row" th:each="map : ${dimensionMap}">
+            <div class="row" style="margin-left: 20px;margin-top: 10px;">
+                <button type="button" class="btn btn-warning btn-lg" th:text="${map.key.labelName}"></button>
+            </div>
+            <div class="row" style="margin-left: 20px;">
+                <a th:href="@{'/song/label/add/' + ${song.id } + '/' + ${lab.id} + '/' + ${pageNo}}" type="button" class="btn btn-info song_label song_label_lab" th:each="lab : ${map.value}" th:text="${lab.labelName}" th:value="${lab.Id}"></a>
+            </div>
+        </div>
+    </div>
+    <div class="row"></div>
+</div>
+<script src="/js/jquery.min.1.12.4.js" ></script>
+<script src="/js/bootstrap.min.js" ></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    ;(function($){
+        $(function(){
+            var song_label_ids = new Array();
+            $(".song_label_id").each(function(){
+                var slId = $(this).attr('value');
+//                console.log("歌曲的标签Id：" + $(this).attr('value'));
+                if((slId != null) && ($.trim(slId ) != '')){
+                    song_label_ids.push($(this).attr('value'));
+                }
+            });
+
+            $(".song_label_lab").each(function(){
+//                console.log("标签库的标签Id：" + $(this).attr('value'));
+                var labelId = $(this).attr('value');
+                var songId = $('#songIdHid').val();
+                var result = song_label_ids.indexOf(labelId);
+                if(result >= 0){
+                    $(this).removeClass('btn-info');
+                    $(this).addClass('btn-success');
+                    $(this).attr('href', '/song/label/del/' + songId + '/' + labelId + '/' + [[${pageNo}]]);
+                }
+            });
+
+            $("#songPlay").on("click", function(){
+                var songId = $(this).attr('value');
+                $.ajax({
+                    type:"GET",
+                    url:"/song/" + songId,
+                    success : function(data){
+                        var audio_play = window.parent.audioFn;
+                        /* 向歌单中添加新曲目，第二个参数true为新增后立即播放该曲目，false则不播放 */
+                        audio_play.song = [];
+                        audio_play.newSong({
+                            'cover' : data.picUrl,
+                            'src' : data.realAudioUrl,
+                            'title' : data.songId + " | " + data.songName + " | " + data.artistName,
+                            'songId' : data.id
+                        },true);
+                    }
+                });
+            });
+        });
+    })(jQuery);
+    /*]]>*/
+</script>
+</body>
+</html>

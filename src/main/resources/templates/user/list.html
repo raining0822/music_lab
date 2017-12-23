@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Song</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="/css/bootstrap.min.css"/>
+    <style>
+        body{
+            background-color: #eeeeee;
+        }
+        .login_head{
+            height: 30px;
+            margin-top: 10px;
+        }
+        .pagination{
+            float: left;
+            margin-left: 35%;
+        }
+        .form-inline{
+            float: left;
+            margin: 20px 10px;
+        }
+        .btn-success{
+            margin-top: 5px;
+        }
+        .btn-label{
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row login_head">
+        <a style="float:right;margin-right: 20%;" href="/user/toadd" type="button" class="btn btn-primary" >添加新用户</a>
+    </div>
+    <div class="row login_middle">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>用户名称</th>
+                <th>上次登录时间</th>
+                <th>用户类型</th>
+                <th>用户标签权限</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${page.list}">
+                <td th:text="${user.userName}"></td>
+                <td th:text="${user.lastLoginTime}"></td>
+                <td th:text="${user.userTypeName}"></td>
+                <td>
+                    <span th:each="tagAuth : ${user.tagAuthList}" th:text="${tagAuth.name + ','}"></span>
+                </td>
+                <td>
+                    <a href="/user/info" class="userInfo" th:href="@{'/user/info/' + ${user.id}}">查看详情</a> |
+                    <a th:if="${user.effect == 1}" href="#" class="userEffect" th:value="${user.id}">禁用</a> <a th:if="${user.effect == 0}" href="#" class="userActive" th:value="${user.id}">启用</a> |
+                    <a href="/user/edit" class="userInfo" th:href="@{'/user/to_edit/' + ${user.id}}">编辑</a>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+    <div class="row page">
+        <nav aria-label="...">
+            <ul class="pagination">
+                <li><a th:href="@{'/user/list/' + ${page.pre}}" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+                <li th:each="i : ${#numbers.sequence(page.start,page.end)}"  th:class="${i == page.pageNo} ? 'active'" ><a th:href="@{'/user/list/' + ${i}}" href="#" th:text="${i}"></a></li>
+                <li><a th:href="@{'/user/list/' + ${page.next}}" href="#">&raquo;</a></li>
+            </ul>
+            <form class="form-inline">
+                <div class="form-group">
+                    <input style="width: 70px;" type="text" class="form-control" id="jumpPage" placeholder="页码"/>
+                </div>
+                <button type="button" class="btn btn-default" id="jump">跳转</button>
+                <span class="label label-primary" style="font-size: 15px;" th:text="${'总计：' + page.totalCount + '条数据'}">Default</span>
+                <span class="label label-primary" style="font-size: 15px;" th:text="${'共' + page.totalPageCount + '页'}">Default</span>
+            </form>
+        </nav>
+    </div>
+</div>
+<script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
+<script th:src="@{/js/bootstrap.min.js}" src="/js/bootstrap.min.js" ></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    (function($){
+        $(function(){
+
+            $("#jump").on("click",function(){
+                var jumpPage = $("#jumpPage").val();
+                var patrn = /^[1-9][0-9]*$/;
+                if(!patrn.exec(jumpPage)){
+                    alert("数字有误！");
+                    return;
+                }
+                window.location.href = "/user/list/" + jumpPage;
+            });
+
+            $(".userEffect").on("click", function(){
+                if(confirm("确定要禁用该账户？")){
+                    var userId = $(this).attr("value");
+                    if(userId != null){
+                        window.location.href = "/user/del/" + userId + "/" + [[${page.pageNo}]];
+                    }
+                }
+            });
+
+            $(".userActive").on("click", function(){
+                if(confirm("确定要启用该账户？")){
+                    var userId = $(this).attr("value");
+                    if(userId != null){
+                        window.location.href = "/user/active/" + userId + "/" + [[${page.pageNo}]];
+                    }
+                }
+            });
+
+        });
+    })(jQuery);
+    /*]]>*/
+</script>
+</body>
+</html>

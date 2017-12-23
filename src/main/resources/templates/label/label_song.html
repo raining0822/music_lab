@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>标签下的单曲</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="/css/bootstrap.min.css"/>
+    <style>
+        body{
+            background-color: #eeeeee;
+        }
+        .login_head{
+            height: 50px;
+        }
+        .pagination{
+            float: left;
+            margin-left: 25%;
+        }
+        .form-inline{
+            float: left;
+            margin: 20px 10px;
+        }
+        .btn-success{
+            margin-top: 5px;
+        }
+        .btn-label{
+            margin-left: 5px;
+        }
+        .song_labels_btn{
+            margin-top: 0px;
+            margin-left: 3px;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            padding-left: 3px;
+            padding-right: 3px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row login_head">
+        <div class="col-md-5">
+            <h3>标签<span class="label label-info" th:text="${label.labelName}">Info</span>下的单曲</h3>
+        </div>
+        <div class="col-md-7" style="text-align: right;">
+            <button type="button" class="btn btn-primary" style="margin-top: 15px;" data-toggle="modal" data-target="#moveSongs">转移该标签下的单曲</button>
+        </div>
+    </div>
+    <div class="row login_middle">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>单曲Id</th>
+                <th>单曲名称</th>
+                <th>已有标签</th>
+                <th>艺术家</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="song : ${page.list}">
+                <td th:text="${song.songId}"></td>
+                <td class="songName" th:text="${song.songName}"></td>
+                <td th:value="${song.id}" class="songLabel"></td>
+                <td th:text="${song.artistName}">王菲</td>
+                <td>
+                    <a href="#" class="playSong" th:value="${song.id}">播放</a>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <nav aria-label="...">
+            <ul class="pagination">
+                <li><a th:href="@{'/song/label/' + ${label.id} + '/list/' + ${page.pre}}" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+                <li th:each="i : ${#numbers.sequence(page.start,page.end)}"  th:class="${i == page.pageNo} ? 'active'" ><a th:href="@{'/song/label/'  + ${label.id} + '/list/' + ${i}}" href="#" th:text="${i}"></a></li>
+                <li><a th:href="@{'/song/label/' + ${label.id} + '/list/' + ${page.next}}" href="#">&raquo;</a></li>
+            </ul>
+            <form class="form-inline">
+                <div class="form-group">
+                    <input style="width: 70px;" type="text" class="form-control" id="jumpPage" placeholder="页码"/>
+                </div>
+                <button type="button" class="btn btn-default" id="jump">跳转</button>
+                <span class="label label-primary" style="font-size: 15px;" th:text="${'总计：' + page.totalCount + '条数据'}">Default</span>
+                <span class="label label-primary" style="font-size: 15px;" th:text="${'共' + page.totalPageCount + '页'}">Default</span>
+            </form>
+        </nav>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="moveSongs">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">把标签<span th:text="${label.labelName}" class="label label-info label-show"></span>下的单曲转移到：</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row" th:each="map : ${dimensionMap}">
+                        <div class="row btn-group" style="margin-left: 20px;margin-top: 10px;" >
+                            <button type="button" class="btn btn-warning btn-lg " th:text="${map.key.labelName}"></button>
+                        </div>
+                        <div class="row" style="margin-left: 20px; margin-top: 5px;" >
+                            <div class="btn-group" th:each="la : ${map.value}">
+                                <a th:if="${la.id != label.id}" th:href="@{'/song/label/update/' + ${label.id} + '/' + ${la.id}}" type="button" class="btn btn-info song_label" th:text="${la.labelName}"></a>
+                                <a th:if="${la.id == label.id}" type="button" class="btn btn-info song_label" th:text="${la.labelName}"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
+<script th:src="@{/js/bootstrap.min.js}" src="/js/bootstrap.min.js" ></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    (function($){
+        $(function(){
+            $(".songLabel").each(function(){
+                var $_this = $(this);
+                var songId = $(this).attr("value");
+                $.ajax({
+                        type:"GET",
+                        url: "/label/song/" + songId,
+                        success: function(data){
+                            $.each(data,function(i, e){
+                                var $btn = $("<button></button>").addClass("btn btn-success btn-label song_labels_btn").attr("type","button").text(e.labelName);
+                                $_this.append($btn);
+                            });
+                        }
+                    }
+                );
+            });
+
+            $("#jump").on("click",function(){
+                var jumpPage = $("#jumpPage").val();
+                var patrn = /^[1-9][0-9]*$/;
+                if(!patrn.exec(jumpPage)){
+                    alert("数字有误！");
+                    return;
+                }
+                window.location.href = "/song/label/" + [[${label.id}]] + "/list/" + jumpPage;
+            });
+
+            $(".playSong").on("click", function(){
+                var songId = $(this).attr('value');
+                $(".playSong").each(function(){
+                    var songName = $(this).parent().parent().find(".songName");
+                    if(songName.find("img")[0]){
+                        songName.find("img").remove();
+                    }
+                });
+                var $_play = $("<img style='margin-left:10px;' width='18' height='18' src='/img/play1.png'/>");
+                $(this).parent().parent().find(".songName").append($_play);
+                $.ajax({
+                    type:"GET",
+                    url:"/song/" + songId,
+                    success : function(data){
+                        var audio_play = window.parent.audioFn;
+                        /* 向歌单中添加新曲目，第二个参数true为新增后立即播放该曲目，false则不播放 */
+                        audio_play.song = [];
+                        audio_play.newSong({
+                            'cover' : data.picUrl,
+                            'src' : data.realAudioUrl,
+                            'title' : data.songId + " | " + data.songName + " | " + data.artistName,
+                            'songId' : data.id
+                        },true);
+                    }
+                });
+            });
+        });
+    })(jQuery);
+    /*]]>*/
+</script>
+</body>
+</html>

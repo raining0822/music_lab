@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>用户信息</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="/css/bootstrap.min.css"/>
+    <style>
+        body{
+            background-color: #eeeeee;
+        }
+        .login_head{
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row login_head"></div>
+    <div class="row login_middle">
+        <h3><span class="label label-primary" th:text="${'用户名：' + user.userName}">Primary</span></h3>
+        <!--<h3><span class="label label-success" th:text="${'总计给单曲添加标签：' + addLabelCount + '个'}">Primary</span></h3>-->
+        <!--<h3><span class="label label-danger" th:text="${'总计给单曲取消标签：' + delLabelCount + '个'}">Primary</span></h3>-->
+        <h3><span class="label label-info" th:text="${'总计处理单曲：' + songCount + '首'}">Primary</span></h3>
+    </div>
+    <div class="row"></div>
+</div>
+
+<script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
+<script th:src="@{/js/bootstrap.min.js}" src="/js/bootstrap.min.js" ></script>
+
+</body>
+</html>
