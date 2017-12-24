@@ -22,8 +22,6 @@ public class ApplicationRun extends WebMvcConfigurerAdapter {
         SpringApplication.run(ApplicationRun.class, args);
     }
 
-
-
     @Bean
     public HttpMessageConverter<String> responseBodyConverter() {
         StringHttpMessageConverter converter = new StringHttpMessageConverter(Charset.forName("UTF-8"));

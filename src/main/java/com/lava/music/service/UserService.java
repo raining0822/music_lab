@@ -1,6 +1,7 @@
 package com.lava.music.service;
 
 import com.lava.music.model.Song;
+import com.lava.music.model.TagAuth;
 import com.lava.music.model.User;
 import com.lava.music.util.Page;
 
@@ -37,5 +38,5 @@ public interface UserService {
     Integer findWorkSongTotalCount(User user);
 
 
-
+    List<TagAuth> findUserTagAuth(Long userId);
 }

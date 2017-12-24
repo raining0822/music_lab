@@ -33,8 +33,10 @@ public interface SongService {
 
     void updateSongTsId(String songId);
 
-    void pushSong(String pushIds);
+    void pushSong(String pushIds, Long userId);
 
 
-    List<Song> pullSongTask(User user);
+    List<Song> pullSongTask(User user, Integer count);
+
+    List<Song> findUserTask(Long userId);
 }

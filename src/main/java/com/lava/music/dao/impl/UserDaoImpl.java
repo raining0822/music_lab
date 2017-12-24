@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -170,14 +171,30 @@ public class UserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public Integer selectUserTaskCount(Long userId) {
-        String sql = "select count(0) from user_task where userId = ? and taskStatus = 2;";
+        String sql = "select count(0) from user_task where userId = ?;";
         return jdbcTemplate.queryForObject(sql, Integer.class, userId);
     }
-
+    @Override
     public List<TagAuth> selectUserTagAuth(String userId){
         String sql = "select ta.id, ta.name from `r_tag_authority_user` as rtau inner join tag_authority as ta on rtau.`tag_auth_id` = ta.`id` where user_id = ? and effect = 1;";
         RowMapper<TagAuth> tagAuthRowMapper = new BeanPropertyRowMapper<TagAuth>(TagAuth.class);
         List<TagAuth> authList = jdbcTemplate.query(sql, tagAuthRowMapper, userId);
         return authList;
+    }
+
+    /**
+     * 批量插入用户任务
+     * @param userId
+     * @param
+     * @return
+     */
+    public Integer insertUserTask(Long userId, List<Song> songList){
+       List<Object[]> params = new ArrayList<Object[]>();
+       for(Song song : songList){
+           params.add(new Object[]{userId, song.getId()});
+       }
+       String sql = "insert into user_task(userId, songId)values(?,?);";
+       int[] number = jdbcTemplate.batchUpdate(sql, params);
+       return number.length;
     }
 }

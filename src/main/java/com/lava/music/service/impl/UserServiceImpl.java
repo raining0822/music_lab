@@ -2,6 +2,7 @@ package com.lava.music.service.impl;
 
 import com.lava.music.dao.UserDao;
 import com.lava.music.model.Song;
+import com.lava.music.model.TagAuth;
 import com.lava.music.model.User;
 import com.lava.music.service.BaseService;
 import com.lava.music.service.UserService;
@@ -105,6 +106,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         return userDao.selectUserTaskCount(userId);
     }
 
+    @Override
+    public List<TagAuth> findUserTagAuth(Long userId) {
+        return userDao.selectUserTagAuth(String.valueOf(userId));
+    }
 
 
 }

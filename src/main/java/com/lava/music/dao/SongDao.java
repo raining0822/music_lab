@@ -1,6 +1,7 @@
 package com.lava.music.dao;
 
 import com.lava.music.model.Song;
+import com.lava.music.model.TagAuth;
 import com.lava.music.model.User;
 import com.lava.music.util.Page;
 
@@ -39,4 +40,10 @@ public interface SongDao {
     void updateTsId(String songId, String tsId);
 
     void pushSong(String[] ids);
+
+    List<Song> selectUserTaskSongFromSong(List<TagAuth> tagAuthList, Integer count);
+    Integer updateSongStatus(Song song);
+    Integer updateSongStatus(List<Song> songList, Integer songStatus);
+
+    List<Song> selectUserTaskSongFromTask(Long userId);
 }

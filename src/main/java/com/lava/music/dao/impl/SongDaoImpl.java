@@ -4,14 +4,15 @@ import com.lava.music.dao.BaseDao;
 import com.lava.music.dao.SongDao;
 import com.lava.music.model.Label;
 import com.lava.music.model.Song;
+import com.lava.music.model.TagAuth;
 import com.lava.music.util.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -131,9 +132,61 @@ public class SongDaoImpl extends BaseDao implements SongDao {
             if(sqlStr.endsWith(",")){
                 sqlStr = sqlStr.substring(0, sqlStr.lastIndexOf(","));
             }
-            String sql = "update song set songStatus = 1 where id in (" + sqlStr + ")";
-            jdbcTemplate.update(sql);
+            String sql = "update song set songStatus = ? where id in (" + sqlStr + ");";
+            jdbcTemplate.update(sql, Song.PUSHED);
         }
+    }
+
+    /**
+     * 根据用户的标签权限，查询用户匹配的任务
+     * @param tagAuthList
+     * @return
+     */
+    @Override
+    public List<Song> selectUserTaskSongFromSong(List<TagAuth> tagAuthList, Integer count) {
+        StringBuffer sql = new StringBuffer("SELECT s.* FROM song AS s inner join song_record as sr on s.id = sr.songId where `effect` = 1 and `songStatus` = 1 and sr.action = '1' ");
+        if(tagAuthList != null && tagAuthList.size() > 0){
+            sql.append("and ( ");
+            if(tagAuthList.size() == 1){
+                TagAuth tagAuth = tagAuthList.get(0);
+                sql.append(getTagAuthSqlStr(tagAuth));
+            }
+            else if(tagAuthList.size() == 2){
+                TagAuth tagAuth0 = tagAuthList.get(0);
+                sql.append(getTagAuthSqlStr(tagAuth0));
+                TagAuth tagAuth1 = tagAuthList.get(1);
+                sql.append(" OR ");
+                sql.append(getTagAuthSqlStr(tagAuth1));
+            }
+            else if(tagAuthList.size() == 3){
+                TagAuth tagAuth0 = tagAuthList.get(0);
+                sql.append(getTagAuthSqlStr(tagAuth0));
+                TagAuth tagAuth1 = tagAuthList.get(1);
+                sql.append(" OR ");
+                sql.append(getTagAuthSqlStr(tagAuth1));
+                TagAuth tagAuth2 = tagAuthList.get(2);
+                sql.append(" OR ");
+                sql.append(getTagAuthSqlStr(tagAuth2));
+            }
+            sql.append(" ) ");
+            sql.append(" ORDER BY sr.createTime DESC LIMIT 0, ?;");
+        }
+        RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        List<Song> taskList = jdbcTemplate.query(sql.toString(), rowMapper, count);
+        return taskList;
+    }
+
+    private String getTagAuthSqlStr(TagAuth tagAuth){
+        if(tagAuth.getId() == 1){
+            return " `basicTag` is null ";
+        }
+        else if(tagAuth.getId() == 2){
+            return " `reasonTag` IS NULL ";
+        }
+        else if(tagAuth.getId() == 3){
+            return " `sensibilityTag` is null ";
+        }
+        return null;
     }
 
 
@@ -174,6 +227,30 @@ public class SongDaoImpl extends BaseDao implements SongDao {
     public Integer selectSongCountByLabel(Long labelId) {
         String sql = "select count(0) from r_song_label where labelId = ? and effect = 1;";
         return jdbcTemplate.queryForObject(sql, Integer.class, labelId);
+    }
+
+
+    public Integer updateSongStatus(Song song){
+        String sql = "update song set songStatus = ? where id = ?;";
+        return jdbcTemplate.update(sql, song.getSongStatus(), song.getId());
+    }
+
+    @Override
+    public Integer updateSongStatus(List<Song> songList, Integer songStatus) {
+        List<Object[]> params = new ArrayList<Object[]>();
+        for(Song song : songList){
+            params.add(new Object[]{songStatus, song.getId()});
+        }
+        String sql = "update song set songStatus = ? where id = ?;";
+        int[] numbers = jdbcTemplate.batchUpdate(sql, params);
+        return numbers.length;
+    }
+
+    @Override
+    public List<Song> selectUserTaskSongFromTask(Long userId) {
+        String sql = "select s.* from song as s INNER JOIN user_task AS ut ON s.id = ut.songId INNER JOIN song_record AS sr ON sr.songId= ut.songId WHERE ut.userId = ? AND sr.action = '1' order by sr.createTime desc;";
+        RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        return jdbcTemplate.query(sql, rowMapper, userId);
     }
 
 

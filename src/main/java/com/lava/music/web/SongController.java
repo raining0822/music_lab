@@ -1,11 +1,9 @@
 package com.lava.music.web;
 
 import com.alibaba.fastjson.JSONObject;
-import com.lava.music.model.Label;
-import com.lava.music.model.Song;
-import com.lava.music.model.User;
-import com.lava.music.model.UserRecord;
+import com.lava.music.model.*;
 import com.lava.music.service.LabelService;
+import com.lava.music.service.SongRecordService;
 import com.lava.music.service.SongService;
 import com.lava.music.service.UserRecordService;
 import com.lava.music.util.CommonUtil;
@@ -46,6 +44,9 @@ public class SongController {
 
     @Autowired
     private UserRecordService userRecordService;
+
+    @Autowired
+    private SongRecordService songRecordService;
 
 
     /**
@@ -138,7 +139,14 @@ public class SongController {
     }
 
 
-
+    /**
+     * 给一首单曲打上标签，多个标签
+     * @param songId
+     * @param labelIds
+     * @param pageNo
+     * @param request
+     * @return
+     */
     @RequestMapping("/label/add/{songId}/{labelIds}/{pageNo}")
     public String addLabel(@PathVariable String songId, @PathVariable String labelIds, @PathVariable Integer pageNo, HttpServletRequest request){
         String labelIdsStr = labelIds;
@@ -161,12 +169,19 @@ public class SongController {
         return "redirect:/song/list/" + pageNo;
     }
 
+    /**
+     * 推送单曲到任务池
+     * @param pushIds
+     * @return
+     */
     @RequestMapping("/push")
     @ResponseBody
-    public String pushSongIds(@RequestParam String pushIds){
+    public String pushSongIds(@RequestParam String pushIds, HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("loginUser");
         try{
             if(StringUtils.hasText(pushIds)){
-                songService.pushSong(pushIds);
+                songService.pushSong(pushIds, user.getId());
                 return "success";
             }
         }

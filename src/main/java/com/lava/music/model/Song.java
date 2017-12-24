@@ -5,19 +5,65 @@ package com.lava.music.model;
  */
 public class Song {
 
+    public static final Integer WAIT_PUSH = 0;
+    public static final Integer PUSHED = 1;
+    public static final Integer PULLED = 2;
+    public static final Integer SUBMITED = 3;
+    public static final Integer AUDITED = 4;
+
     private Long id;
     private String songId;
     private String songName;
     private String language;
     private String artistName;
+    private String albumName;
     private String realAudioUrl;
     private String picUrl;
     private Integer effect;
 
     private String tsId;
     private String albumPic;
+    //基础标签
+    private Integer basicTag;
+    //理性标签
+    private Integer reasonTag;
+    //感性标签
+    private Integer sensibilityTag;
 
     private Integer songStatus;
+
+
+    public String getAlbumName() {
+        return albumName;
+    }
+
+    public void setAlbumName(String albumName) {
+        this.albumName = albumName;
+    }
+
+    public Integer getBasicTag() {
+        return basicTag;
+    }
+
+    public void setBasicTag(Integer basicTag) {
+        this.basicTag = basicTag;
+    }
+
+    public Integer getReasonTag() {
+        return reasonTag;
+    }
+
+    public void setReasonTag(Integer reasonTag) {
+        this.reasonTag = reasonTag;
+    }
+
+    public Integer getSensibilityTag() {
+        return sensibilityTag;
+    }
+
+    public void setSensibilityTag(Integer sensibilityTag) {
+        this.sensibilityTag = sensibilityTag;
+    }
 
     public Integer getSongStatus() {
         return songStatus;

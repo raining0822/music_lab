@@ -98,14 +98,14 @@ public class LabelDaoImpl extends BaseDao implements LabelDao {
 
     @Override
     public List<Label> findByFatherId(Long fatherId) {
-        String sql = "select * from label where fatherId = ? and effect = 1 order by id asc;";
+        String sql = "select * from label where fatherId = ? and effect = 1 order by labelNo asc;";
         RowMapper<Label> labelRowMapper = new BeanPropertyRowMapper<Label>(Label.class);
         return jdbcTemplate.query(sql, labelRowMapper, fatherId);
     }
 
     @Override
     public Label selectRootLabel() {
-        String sql = "select * from label where labelLevel = 0;";
+        String sql = "select * from label where labelLevel = -1;";
         RowMapper<Label> labelRowMapper = new BeanPropertyRowMapper<Label>(Label.class);
         return jdbcTemplate.queryForObject(sql, labelRowMapper);
     }
@@ -139,5 +139,11 @@ public class LabelDaoImpl extends BaseDao implements LabelDao {
         String sql = "select * from label where id in (" + labelIds + ") and effect = 1;";
         RowMapper<Label> labelRowMapper = new BeanPropertyRowMapper<Label>(Label.class);
         return jdbcTemplate.query(sql, labelRowMapper);
+    }
+
+    @Override
+    public Integer updateLabelNo(Label label) {
+        String sql = "update label set labelNo = ? , labelLevel = ? where id = ?;";
+        return jdbcTemplate.update(sql, label.getLabelNo(), label.getLabelLevel(), label.getId());
     }
 }

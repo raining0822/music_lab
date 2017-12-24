@@ -24,4 +24,6 @@ public interface LabelService {
     List<Label> findLabel(Label label);
 
     void updateLabel(Long labelId, String labelName);
+
+    void initLabelNo();
 }

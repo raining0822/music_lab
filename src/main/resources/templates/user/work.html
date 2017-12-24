@@ -74,41 +74,27 @@
                 <th style="width: 5%;">单曲Id</th>
                 <th style="width: 25%;">单曲名称</th>
                 <th style="width: 10%;">艺术家</th>
-                <th style="width: 50%;">已有标签</th>
+                <th style="width: 10%;">专辑名称</th>
+                <th style="width: 40%;">已有标签</th>
                 <th style="width: 10%;">操作</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="song : ${page.list}" style="height: 40px; line-height: 40px;">
+            <tr th:each="song : ${taskList}" style="height: 40px; line-height: 40px;">
                 <td th:text="${song.id}"><div style="height: 23px; overflow: hidden;" th:text="${song.id}"></div></td>
                 <td class="songName" ><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.songName}"></div></td>
                 <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.artistName}"></div></td>
-                <td ><div style="height: 23px; overflow: hidden;" th:value="${song.id}"  class="songLabel"></div></td>
+                <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.albumName}"></div></td>
+                <td><button th:if="${song.basicTag == 1}" type="button" class="btn btn-success">基础</button> <button th:if="${song.reasonTag == 1}" type="button" class="btn btn-primary">理性</button> <button th:if="${song.sensibilityTag == 1}" type="button" class="btn btn-info">感性</button>
+                </td>
                 <td>
                     <a href="#" class="playSong" th:value="${song.id}">播放</a> |
-                    <a th:href="@{'/song/label/' + ${song.id}} + '/' + ${page.pageNo}"  href="/song/label">打标签</a>
+                    <a th:href="@{'/song/label/' + ${song.id}}"  href="/song/label">打标签</a>
                 </td>
             </tr>
 
             </tbody>
         </table>
-    </div>
-    <div class="row page">
-        <nav aria-label="...">
-            <ul class="pagination" style="margin-top: 0px;">
-                <li><a th:href="@{'/song/list/' + ${page.pre}}" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-                <li th:each="i : ${#numbers.sequence(page.start,page.end)}"  th:class="${i == page.pageNo} ? 'active'" ><a th:href="@{'/song/list/' + ${i}}" href="#" th:text="${i}"></a></li>
-                <li><a th:href="@{'/song/list/'  + ${page.next}}" href="#">&raquo;</a></li>
-            </ul>
-            <form class="form-inline">
-                <div class="form-group">
-                    <input style="width: 70px;" type="text" class="form-control" id="jumpPage" placeholder="页码"/>
-                </div>
-                <button type="button" class="btn btn-default" id="jump">跳转</button>
-                <span class="label label-primary" style="font-size: 15px;" th:text="${'总计：' + page.totalCount + '条数据'}">Default</span>
-                <span class="label label-primary" style="font-size: 15px;" th:text="${'共' + page.totalPageCount + '页'}">Default</span>
-            </form>
-        </nav>
     </div>
 </div>
 <script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
@@ -132,15 +118,7 @@
                     }
                 );
             });
-            $("#jump").on("click",function(){
-                var jumpPage = $("#jumpPage").val();
-                var patrn = /^[1-9][0-9]*$/;
-                if(!patrn.exec(jumpPage)){
-                    alert("数字有误！");
-                    return;
-                }
-                window.location.href = "/song/list/"  + jumpPage;
-            });
+
             $(".playSong").on("click", function(){
                 var songId = $(this).attr('value');
                 $(".playSong").each(function(){

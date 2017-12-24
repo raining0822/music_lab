@@ -84,5 +84,40 @@ public class LabelServiceImpl extends BaseService implements LabelService {
         labelDao.update(label);
     }
 
+    @Override
+    public void initLabelNo() {
+        Label label = labelDao.selectRootLabel();
+        label.setLabelLevel(-1);
+        label.setLabelNo("000");
+        labelDao.updateLabelNo(label);
+        handlerLabelNo(label);
+    }
+
+    private void handlerLabelNo(Label label){
+        String labelNo = label.getLabelNo();
+        List<Label> sonList = labelDao.findByFatherId(label.getId());
+        if(sonList != null && sonList.size() > 0){
+            int i = 1;
+            for(Label lab : sonList){
+                lab.setLabelLevel(label.getLabelLevel() + 1);
+                String no = String.valueOf(i);
+                int len = no.length();
+                if(len < 3){
+                    String tmp = "";
+                    for(int k = 0; k < (3 - len); k ++){
+                        tmp += "0";
+                    }
+                    no = tmp + no;
+                }
+                lab.setLabelNo(labelNo + no);
+                labelDao.updateLabelNo(lab);
+                i ++;
+                handlerLabelNo(lab);
+            }
+        }else{
+            return;
+        }
+    }
+
 
 }

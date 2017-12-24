@@ -21,33 +21,6 @@
             margin-top: 10px;
             border-top: 1px gainsboro solid;
         }
-        .song_label{
-            margin-top: 5px;
-        }
-        .dimension{
-            margin-top: 5px;
-        }
-        .btn-show{
-            font-size: 11px;
-            font-weight: 100;
-            padding: 3px 5px 3px 5px;
-        }
-        .btn-show{
-            font-size: 11px;
-            font-weight: 100;
-            padding: 3px 5px 3px 5px;
-        }
-        .dimension-show{
-            margin-top: 3px;
-            margin-left: 3px;
-        }
-        .type_btn{
-            padding: 3px 5px 3px 5px;
-            font-weight: 100;
-            font-size: 11px;
-            background-color: #8c8c8c;
-            border-color: #8c8c8c;
-        }
         .addLabel{
             margin-right: 2px;
             vertical-align: top;
@@ -64,183 +37,11 @@
         <div class="col-md-10" style="text-align: right;">
 
         </div>
-
     </div>
     <div class="row login_middle">
         <div>
             <ul id="labelTree" class="ztree"></ul>
         </div>
-        <!--<div class="row" th:each="label : ${labelList}">-->
-            <!--<div class="row btn-group" style="margin-left: 20px;margin-top: 10px;" >-->
-                <!--<button type="button" class="btn btn-warning btn-lg btn-show" th:text="${label.labelName}"></button>-->
-                <!--<button th:if="${session.loginUser.userType == 0}" type="button" class="btn-show btn btn-warning btn-lg dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-                    <!--<span class="caret"></span>-->
-                <!--</button>-->
-                <!--<ul th:if="${session.loginUser.userType == 0}" class="dropdown-menu">-->
-                    <!--<li><a href="#" data-toggle="modal" data-target="#addType" th:attr="data-dimensionid=${label.id}">添加分类</a></li>-->
-                    <!--<li><a href="#" data-toggle="modal" data-target="#addLabel" th:attr="data-dimensionid=${label.id}">添加标签</a></li>-->
-                    <!--<li><a href="#" data-toggle="modal" data-target="#delDimension" th:attr="data-deldimension=${label.id}">删除维度</a></li>-->
-                <!--</ul>-->
-            <!--</div>-->
-            <!--<div class="row" style="margin-left: 20px;" >-->
-                <!--<div class="btn-group" th:each="label2 : ${label.sonLabels}" th:if="${label2.labelLevel == 2}">-->
-                    <!--<button type="button" class="btn btn-info song_label btn-show type_btn" th:text="${label2.labelName}"></button>-->
-                    <!--<button th:if="${session.loginUser.userType == 0}" type="button" class="btn-show btn btn-info song_label dropdown-toggle type_btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-                        <!--<span class="caret"></span>-->
-                    <!--</button>-->
-                    <!--<ul th:if="${session.loginUser.userType == 0}" class="dropdown-menu">-->
-                        <!--<li><a href="#" data-toggle="modal" data-target="#delLabel" th:attr="data-dellabel=${label2.id}">删除分类</a></li>-->
-                    <!--</ul>-->
-                    <!--<div  style="margin-left: 5px;" class="btn-group" th:each="label3 : ${label2.sonLabels}">-->
-                        <!--<button type="button" class="btn btn-info song_label btn-show" th:text="${label3.labelName}"></button>-->
-                        <!--<button th:if="${session.loginUser.userType == 0}" type="button" class="btn-show btn btn-info song_label dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-                            <!--<span class="caret"></span>-->
-                        <!--</button>-->
-                        <!--<ul th:if="${session.loginUser.userType == 0}" class="dropdown-menu">-->
-                            <!--<li><a href="#" data-toggle="modal" data-target="#moveLabel" th:attr="data-movelabel=${label3.id},data-labelname=${label3.labelName}">移动标签</a></li>-->
-                            <!--<li><a href="#" data-toggle="modal" data-target="#delLabel" th:attr="data-dellabel=${label3.id}">删除标签</a></li>-->
-
-                        <!--</ul>-->
-                    <!--</div>-->
-                <!--</div>-->
-
-                <!--<div class="btn-group" th:each="label3 : ${label.sonLabels}" th:if="${label3.labelLevel == 3}">-->
-                    <!--<button type="button" class="btn btn-info song_label btn-show" th:text="${label3.labelName}"></button>-->
-                    <!--<button th:if="${session.loginUser.userType == 0}" type="button" class="btn-show btn btn-info song_label dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-                        <!--<span class="caret"></span>-->
-                    <!--</button>-->
-                    <!--<ul th:if="${session.loginUser.userType == 0}" class="dropdown-menu">-->
-                        <!--<li><a href="#" data-toggle="modal" data-target="#moveLabel" th:attr="data-movelabel=${label3.id},data-labelname=${label3.labelName}">移动标签</a></li>-->
-                        <!--<li><a href="#" data-toggle="modal" data-target="#delLabel" th:attr="data-dellabel=${label3.id}">删除标签</a></li>-->
-                    <!--</ul>-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
-
-    </div>
-    <div class="row">
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="moveLabel">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">移动标签 <span class="label label-success label-show"></span> 到：</h4>
-                        <input type="hidden" id="moveLabelId"/>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row" style="margin-left: 5px;" >
-                            <a class="btn-show btn btn-warning btn-lg dimension-show" th:each="map : ${dimensionMap}" th:attr="value=${map.key.id}" th:text="${map.key.labelName}"></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="addLabel">
-            <div class="modal-dialog modal-sm" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">添加标签：</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form th:action="@{/label/add/label}" action="/label/add/label" method="post" id="labelForm">
-                            <div class="form-group">
-                                <input name="labelName" id="labelName" style="width: 120px; height: 50px;" type="text" class="form-control" placeholder="标签名称"/>
-                                <input type="hidden" name="fId" id="fId"/>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button id="labelSub" type="button" class="btn btn-primary">提交</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="addType">
-            <div class="modal-dialog modal-sm" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">添加分类：</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form th:action="@{/label/add/type}"  method="post" id="typeForm">
-                            <div class="form-group">
-                                <input name="typeName" id="typeName" style="width: 120px; height: 50px;" type="text" class="form-control" placeholder="分类名称"/>
-                                <input type="hidden" name="type_fId" id="type_fId"/>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button id="typeLabelSub" type="button" class="btn btn-primary">提交</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="addDimension">
-            <div class="modal-dialog modal-sm" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">添加维度：</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form th:action="@{/label/add/dimension}" action="/label/add/dimension" id="dimensionForm" method="post">
-                            <div class="form-group">
-                                <input id="dimensionName" name="dimensionName" style="width: 120px; height: 50px;" type="text" class="form-control" placeholder="维度名称"/>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-primary" id="dimensionSub">提交</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="delDimension">
-            <div class="modal-dialog modal-sm" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">删除维度：</h4>
-                    </div>
-                    <div class="modal-body alert alert-danger">
-                        <p>如果该维度下有标签，是不能删除该维度的，请先删除该维度下的标签！确认进行删除吗？</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <a type="button" class="btn btn-primary" id="delDimensionBtn">提交</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="delLabel">
-            <div class="modal-dialog modal-sm" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">删除标签：</h4>
-                    </div>
-                    <div class="modal-body alert alert-danger">
-                        <p>标签属于基础数据，删除后，单曲上的对应标签会消失，建议先将该标签下的单曲进行转移，再进行标签的删除。确认要删除该标签吗？</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <a type="button" class="btn btn-primary" id="delLabelBtn">提交</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
 <script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
@@ -343,18 +144,17 @@
             }
 
             function zTreeBeforeDrag(treeId, treeNodes) {
-                if(treeNodes[0].children == undefined){
+                if(treeNodes[0].children == undefined || treeNodes[0].children == null || treeNodes[0].children.length < 1){
                     return true;
                 }
                 return false;
             };
 
-            function zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType) {
-                //alert(treeNodes.length + "," + (targetNode ? (targetNode.tId + ", " + targetNode.name) : "isRoot" ));
+            function zTreeOnDrop(event, treeId, treeNodes, targetNode, moveType, isCopy) {
                 $.ajax({
                     type : "POST",
                     url : "/label/move/label",
-                    data : "labelId=" + treeNodes[0].id + "&targetId=" + targetNode.id,
+                    data : "labelId=" + treeNodes[0].id + "&targetId=" + targetNode.id + "&moveType=" + moveType,
                     success : function(data){
                         console.log(data);
                     }
@@ -387,85 +187,8 @@
                     });
                 }
             }
-
-
-
         });
     })(jQuery);
-
-//    (function($){
-//        $(function(){
-//            $(this).parent().find("#audio_play").fadeOut();
-//            $("#dimensionSub").on("click",function(){
-//                var dimensionName = $("#dimensionName").val();
-//                if($.trim(dimensionName) == ""){
-//                    alert("维度名称不能为空！");
-//                }else{
-//                    $("#dimensionForm").submit();
-//                }
-//            });
-//            $("#labelSub").on("click",function(){
-//                var labelName = $("#labelName").val();
-//                if($.trim(labelName) == ""){
-//                    alert("标签名称不能为空！");
-//                }else{
-//                    $("#labelForm").submit();
-//                }
-//            });
-//            $("#typeLabelSub").on("click",function(){
-//                var typeName = $("#typeName").val();
-//                if($.trim(typeName) == ""){
-//                    alert("分类名称不能为空！");
-//                }else{
-//                    $("#typeForm").submit();
-//                }
-//            });
-//
-//
-//            $("#addLabel").on("show.bs.modal", function(e){
-//                var button = $(e.relatedTarget);
-//                var dimensionId = button.data("dimensionid");
-//                var modal = $(this);
-//                modal.find("#fId").val(dimensionId);
-//            });
-//            $("#addType").on("show.bs.modal", function(e){
-//                var button = $(e.relatedTarget);
-//                var dimensionId = button.data("dimensionid");
-//                var modal = $(this);
-//                modal.find("#type_fId").val(dimensionId);
-//            });
-//            $("#moveLabel").on("show.bs.modal",function(e){
-//                var button = $(e.relatedTarget);
-//                var labelId = button.data("movelabel");
-//                var labelName = button.data("labelname");
-//                var modal = $(this);
-//                modal.find(".label-show").html(labelName);
-//                modal.find("#moveLabelId").val(labelId);
-//            });
-//            $("#delLabel").on("show.bs.modal", function(e){
-//                var button = $(e.relatedTarget);
-//                var labelId = button.data("dellabel");
-//                var modal = $(this);
-//                modal.find("#delLabelBtn").attr("href","/label/del/label/" + labelId);
-//            });
-//            $("#delDimension").on("show.bs.modal", function(e){
-//                var button = $(e.relatedTarget);
-//                var labelId = button.data("deldimension");
-//                var modal = $(this);
-//                modal.find("#delDimensionBtn").attr("href","/label/del/dimension/" + labelId);
-//            });
-//            $(".dimension-show").on("click", function(){
-//                var dimensionId = $(this).attr("value");
-//                var labelId = $("#moveLabelId").val();
-//                window.location.href = "/label/move/" + dimensionId + "/" + labelId;
-//            });
-//
-//
-//            $("#labelEdit").on("click",function () {
-//
-//            });
-//        });
-//    })(jQuery);
     /*]]>*/
 </script>
 </body>

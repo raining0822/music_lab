@@ -28,4 +28,6 @@ public interface LabelDao {
     Label selectEffectById(Long id);
 
     List<Label> selectByIds(String labelIds);
+
+    Integer updateLabelNo(Label label);
 }

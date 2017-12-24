@@ -277,24 +277,34 @@ public class UserController {
         return "user/edit";
     }
 
-    @RequestMapping("/work/{pageNo}")
-    public String toWork(@PathVariable Integer pageNo, ModelMap modelMap, HttpServletRequest request){
-
+    /**
+     * 用户领取自己的任务
+     * @param modelMap
+     * @param request
+     * @return
+     */
+    @RequestMapping("/work")
+    public String toWork(ModelMap modelMap, HttpServletRequest request){
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("loginUser");
+        List<Song> taskList = null;
+        List<TagAuth> tagAuthList = userService.findUserTagAuth(user.getId());
+        if(tagAuthList == null || tagAuthList.size() < 1){
+            modelMap.put("taskList", taskList);
+            return "user/work";
+        }
         //首先查询当前用户正在处理的任务数
         Integer totalCount = userService.findWorkSongTotalCount(user);
         if(totalCount < 100){
             Integer pullCount = 100 - totalCount;
             //算出还能添加多少任务
             //从任务池中拉取增量任务（拉取的时候要进行判断，只有符合当前用户权限的任务才能拉取）
-            List<Song> pullList = songService.pullSongTask(user);
+            List<Song> pullList = songService.pullSongTask(user, pullCount);
         }
-        /*Page<Song> page = new Page<Song>(pageNo, 10, totalCount);
-        page = songService.findWorkSongByPage(page,user);
-        modelMap.addAttribute("page", page);*/
+        //查询该用户的任务
+        taskList = songService.findUserTask(user.getId());
+        modelMap.put("taskList", taskList);
         return "user/work";
-
     }
 
 

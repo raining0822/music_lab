@@ -36,29 +36,41 @@ public class LabelController {
 
 
     /**
-     * 获取所有的维度和维度下的标签
+     * 跳转到标签库页面
      * @param modelMap
      * @return
      */
     @RequestMapping("/list")
     public String dimensionList(ModelMap modelMap){
-        //List<Label> labelList_1 = getAllLabels();
-        /*List<Label> dimensionList =  labelService.findDimension();
-        Map<Label, List<Label>> dimensionMap = new LinkedHashMap<Label, List<Label>>();
-        for(Label dimension : dimensionList){
-            if(dimension != null){
-                List<Label> labelList = labelService.findLabel(dimension.getId());
-                dimensionMap.put(dimension, labelList);
-            }
-        }
-        modelMap.addAttribute("dimensionMap", dimensionMap);*/
-        //modelMap.addAttribute("labelList", labelList_1);
         return "label/label";
     }
 
+    /**
+     * 获取所有的标签，包括根标签
+     * @return
+     */
+    @RequestMapping("/label_list/all")
+    @ResponseBody
+    public Label findAllLabels(){
+        if(rootLabel != null){
+            return rootLabel;
+        }
+        Label root = labelService.findById(1L);
+        root = findAllLabelsByRoot(root);
+        rootLabel = root;
+        return root;
+    }
+
+    @RequestMapping("/init_label_no")
+    public void initLabelNo(){
+        labelService.initLabelNo();
+    }
+
+
+
     @RequestMapping("/all")
     @ResponseBody
-    public List<Label> getAllLabel(){
+    public List<Label> getAllLabel(@PathVariable Integer rootTag){
         if(rootLabel != null){
             return rootLabel.getSonLabels();
         }
@@ -68,22 +80,7 @@ public class LabelController {
         return rootLabel.getSonLabels();
     }
 
-    /*private List<Label> getAllLabels(){
-        List<Label> labelList_1 = labelService.findLabel(1L);
-        for(Label label : labelList_1){
-            List<Label> labelList_2 = labelService.findLabel(label.getId());
-            if(labelList_2 != null && labelList_2.size() > 0){
-                label.setSonLabels(labelList_2);
-                for(Label label1 : labelList_2){
-                    List<Label> labelList_3 = labelService.findLabel(label1.getId());
-                    if(labelList_3 != null && labelList_3.size() > 0){
-                        label1.setSonLabels(labelList_3);
-                    }
-                }
-            }
-        }
-        return labelList_1;
-    }*/
+
 
 
     /**
@@ -98,17 +95,7 @@ public class LabelController {
         return labelList;
     }
 
-    @RequestMapping("/label_list/all")
-    @ResponseBody
-    public Label findAllLabels(){
-        if(rootLabel != null){
-            return rootLabel;
-        }
-        Label root = labelService.findById(1L);
-        root = findAllLabelsByRoot(root);
-        rootLabel = root;
-        return root;
-    }
+
 
 
     private Label findAllLabelsByRoot(Label label){
@@ -125,39 +112,8 @@ public class LabelController {
 
     @RequestMapping("/experiment")
     public String experiment(ModelMap modelMap){
-        /*List<Label> dimensionList =  labelService.findDimension();
-        Map<Label, List<Label>> dimensionMap = new LinkedHashMap<Label, List<Label>>();
-        for(Label dimension : dimensionList){
-            if(dimension != null){
-                List<Label> labelList = labelService.findLabel(dimension.getId());
-                dimensionMap.put(dimension, labelList);
-            }
-        }
-        modelMap.addAttribute("dimensionMap", dimensionMap);*/
         return "label/experiment";
     }
-
-    /**
-     * 给标签库中添加维度
-     * @param dimensionName
-     * @param request
-     * @return
-
-    @RequestMapping("/add/dimension")
-    public String addDimension(@RequestParam String dimensionName, HttpServletRequest request){
-        labelService.addLabel(dimensionName, 1, null);
-        //添加日志
-        HttpSession session = request.getSession();
-        User loginUser = (User) session.getAttribute("loginUser");
-        UserRecord userRecord = new UserRecord();
-        userRecord.setAction(UserRecord.ADD_DIMENSION);
-        userRecord.setCreateTime(new Date());
-        userRecord.setUserId(loginUser.getId());
-        userRecord.setSourceData(dimensionName);
-        userRecordService.addRecord(userRecord);
-        return "redirect:/label/list";
-    }
-     */
 
     /**
      * 添加一个标签
@@ -190,51 +146,6 @@ public class LabelController {
     }
 
     /**
-     * 给维度添加分类
-     * @param typeName
-     * @param type_fId
-     * @param request
-     * @return
-
-    @RequestMapping("/add/type")
-    public String addType(@RequestParam String typeName, @RequestParam String type_fId, HttpServletRequest request){
-        labelService.addLabel(typeName, 2, Long.valueOf(type_fId));
-        //添加日志
-        HttpSession session = request.getSession();
-        User loginUser = (User) session.getAttribute("loginUser");
-        UserRecord userRecord = new UserRecord();
-        userRecord.setAction(UserRecord.ADD_LABEL);
-        userRecord.setCreateTime(new Date());
-        userRecord.setUserId(loginUser.getId());
-        userRecord.setSourceData(typeName + "|" + type_fId);
-        userRecordService.addRecord(userRecord);
-        return "redirect:/label/list";
-    }
-     */
-    /**
-     * 将某一个维度下的标签转到另一个维度下
-     * @param dimensionId
-     * @param labelId
-     * @param request
-     * @return
-
-    @RequestMapping("/move/{dimensionId}/{labelId}")
-    public String moveLabel(@PathVariable String dimensionId, @PathVariable String labelId, HttpServletRequest request){
-        labelService.moveLabel(Long.valueOf(labelId), Long.valueOf(dimensionId));
-        //添加日志
-        HttpSession session = request.getSession();
-        User loginUser = (User) session.getAttribute("loginUser");
-        UserRecord userRecord = new UserRecord();
-        userRecord.setAction(UserRecord.MOVE_LABEL);
-        userRecord.setCreateTime(new Date());
-        userRecord.setUserId(loginUser.getId());
-        userRecord.setSourceData(labelId + "|" + dimensionId);
-        userRecordService.addRecord(userRecord);
-        return "redirect:/label/list";
-    }
-     */
-
-    /**
      * 移动某一个标签
      * @param labelId
      * @param request
@@ -242,9 +153,32 @@ public class LabelController {
      */
     @RequestMapping("/move/label")
     @ResponseBody
-    public String moveLabel(@RequestParam String labelId, @RequestParam String targetId, HttpServletRequest request){
+    public String moveLabel(@RequestParam String labelId, @RequestParam String targetId, @RequestParam String moveType, HttpServletRequest request){
         Label label = labelService.findById(Long.valueOf(labelId));
-        labelService.moveLabel(Long.valueOf(labelId), Long.valueOf(targetId));
+        Label targetLabel = null;
+        if(StringUtils.hasText(targetId)){
+            targetLabel = labelService.findById(Long.valueOf(targetId));
+        }
+        if(StringUtils.hasText(moveType) && targetLabel != null){
+            if(moveType.equals("next")){
+                Long selfFatherId = label.getFatherId();
+                Long fatherId = targetLabel.getFatherId();
+                if(selfFatherId.equals(fatherId)){
+                    //只是改变顺序
+                    List<Label> labelList = labelService.findLabel(selfFatherId);
+
+                }else{
+                    //修改父id，并且改变顺序
+                }
+            }
+            else if(moveType.equals("prev")){
+
+            }
+            else if(moveType.equals("inner")){
+
+            }
+        }
+        //labelService.moveLabel(Long.valueOf(labelId), Long.valueOf(targetId));
         rootLabel = null;
         //添加日志
         HttpSession session = request.getSession();
@@ -284,6 +218,7 @@ public class LabelController {
         userRecordService.addRecord(userRecord);
         return "done";
     }
+
     /**
      * 编辑某一个标签
      * @param labelId
@@ -307,31 +242,7 @@ public class LabelController {
         return "done";
     }
 
-    /**
-     * 删除某一个维度
-     * @param dimensionId
-     * @param request
-     * @return
 
-    @RequestMapping("/del/dimension/{dimensionId}")
-    public String delDimension(@PathVariable String dimensionId, HttpServletRequest request){
-        List<Label> labelList = labelService.findLabel(Long.valueOf(dimensionId));
-        //只有当该维度下没有标签的时候，才能删除该维度
-        if(labelList != null && labelList.size() < 1 ){
-            labelService.delLabel(Long.valueOf(dimensionId));
-            //添加日志
-            HttpSession session = request.getSession();
-            User loginUser = (User) session.getAttribute("loginUser");
-            UserRecord userRecord = new UserRecord();
-            userRecord.setAction(UserRecord.DELETE_DIMENSION);
-            userRecord.setCreateTime(new Date());
-            userRecord.setUserId(loginUser.getId());
-            userRecord.setSourceData(dimensionId);
-            userRecordService.addRecord(userRecord);
-        }
-        return "redirect:/label/list";
-    }
-     */
     /**
      * 获取某一首单曲的标签
      * @param songId

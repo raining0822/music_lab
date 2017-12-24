@@ -15,7 +15,17 @@ public class Label {
     private Integer effect;
     private Integer labelLevel;
     private Date createTime;
+    private String labelNo;
     private List<Label> sonLabels;
+
+
+    public String getLabelNo() {
+        return labelNo;
+    }
+
+    public void setLabelNo(String labelNo) {
+        this.labelNo = labelNo;
+    }
 
     public List<Label> getSonLabels() {
         return sonLabels;
