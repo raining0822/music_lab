@@ -30,4 +30,6 @@ public interface LabelDao {
     List<Label> selectByIds(String labelIds);
 
     Integer updateLabelNo(Label label);
+
+    Integer updateLabelNo(List<Label> sonList);
 }

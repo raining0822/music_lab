@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface LabelService {
 
-    Long addLabel(String labelName, Integer labelLevel, Long fatherId);
+    Long addLabel(String labelName, Label fatherLabel);
     List<Label> findDimension();
     List<Label> findLabel(Long fatherId);
     Integer moveLabel(Long labelId, Long fatherId);
@@ -26,4 +26,8 @@ public interface LabelService {
     void updateLabel(Long labelId, String labelName);
 
     void initLabelNo();
+
+    void updateLabelNo(Label label);
+
+    Integer updateLabel(Label targetLabel, List<Label> targetLabelSonList);
 }

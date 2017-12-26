@@ -18,6 +18,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class LabelDaoImpl extends BaseDao implements LabelDao {
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                 PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, label.getLabelName());
-                ps.setString(2,"");
+                ps.setString(2,label.getLabelNo());
                 ps.setInt(3, label.getLabelLevel());
                 ps.setLong(4, label.getFatherId());
                 ps.setInt(5, label.getEffect());
@@ -145,5 +146,16 @@ public class LabelDaoImpl extends BaseDao implements LabelDao {
     public Integer updateLabelNo(Label label) {
         String sql = "update label set labelNo = ? , labelLevel = ? where id = ?;";
         return jdbcTemplate.update(sql, label.getLabelNo(), label.getLabelLevel(), label.getId());
+    }
+
+    @Override
+    public Integer updateLabelNo(List<Label> labelList) {
+        List<Object[]> params = new ArrayList<Object[]>();
+        for(Label label : labelList){
+            params.add(new Object[]{label.getLabelNo(), label.getLabelLevel(), label.getFatherId(), label.getId()});
+        }
+        String sql = "update label set labelNo = ?, labelLevel = ?,fatherId = ? where id = ?; ";
+        int[] num = jdbcTemplate.batchUpdate(sql, params);
+        return num.length;
     }
 }

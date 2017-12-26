@@ -4,6 +4,7 @@ import com.lava.music.dao.LabelDao;
 import com.lava.music.model.Label;
 import com.lava.music.service.BaseService;
 import com.lava.music.service.LabelService;
+import com.lava.music.util.LabelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +21,15 @@ public class LabelServiceImpl extends BaseService implements LabelService {
     private LabelDao labelDao;
 
     @Override
-    public Long addLabel(String labelName, Integer labelLevel, Long fatherId) {
+    public Long addLabel(String labelName, Label fatherLabel) {
         Label label = new Label();
         label.setLabelName(labelName);
-        label.setLabelLevel(labelLevel);
+        label.setLabelLevel(fatherLabel.getLabelLevel() + 1);
         label.setEffect(1);
         label.setSonNum(0);
         label.setCreateTime(new Date());
-        label.setFatherId(fatherId);
+        label.setFatherId(fatherLabel.getId());
+        label.setLabelNo(LabelUtil.getLabelNo(fatherLabel, labelDao.findByFatherId(fatherLabel.getId())));
         return labelDao.insert(label);
     }
 
@@ -100,15 +102,7 @@ public class LabelServiceImpl extends BaseService implements LabelService {
             int i = 1;
             for(Label lab : sonList){
                 lab.setLabelLevel(label.getLabelLevel() + 1);
-                String no = String.valueOf(i);
-                int len = no.length();
-                if(len < 3){
-                    String tmp = "";
-                    for(int k = 0; k < (3 - len); k ++){
-                        tmp += "0";
-                    }
-                    no = tmp + no;
-                }
+                String no = LabelUtil.addZero(i, 3);
                 lab.setLabelNo(labelNo + no);
                 labelDao.updateLabelNo(lab);
                 i ++;
@@ -118,6 +112,19 @@ public class LabelServiceImpl extends BaseService implements LabelService {
             return;
         }
     }
+
+    @Override
+    public void updateLabelNo(Label label) {
+        labelDao.updateLabelNo(label);
+    }
+
+    @Override
+    public Integer updateLabel(Label label, List<Label> sonList) {
+        sonList.add(label);
+        return labelDao.updateLabelNo(sonList);
+    }
+
+
 
 
 }

@@ -5,6 +5,7 @@ import com.lava.music.model.User;
 import com.lava.music.model.UserRecord;
 import com.lava.music.service.LabelService;
 import com.lava.music.service.UserRecordService;
+import com.lava.music.util.LabelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
@@ -52,51 +53,14 @@ public class LabelController {
     @RequestMapping("/label_list/all")
     @ResponseBody
     public Label findAllLabels(){
-        if(rootLabel != null){
+        /*if(rootLabel != null){
             return rootLabel;
-        }
+        }*/
         Label root = labelService.findById(1L);
         root = findAllLabelsByRoot(root);
         rootLabel = root;
         return root;
     }
-
-    @RequestMapping("/init_label_no")
-    public void initLabelNo(){
-        labelService.initLabelNo();
-    }
-
-
-
-    @RequestMapping("/all")
-    @ResponseBody
-    public List<Label> getAllLabel(@PathVariable Integer rootTag){
-        if(rootLabel != null){
-            return rootLabel.getSonLabels();
-        }
-        Label root = labelService.findById(1L);
-        root = findAllLabelsByRoot(root);
-        rootLabel = root;
-        return rootLabel.getSonLabels();
-    }
-
-
-
-
-    /**
-     * 获取某个节点下的标签集合
-     * @param fatherId
-     * @return
-     */
-    @RequestMapping("/label_list/{fatherId}")
-    @ResponseBody
-    public List<Label> getLabelByFatherId(@PathVariable String fatherId){
-        List<Label> labelList = labelService.findLabel(Long.valueOf(fatherId));
-        return labelList;
-    }
-
-
-
 
     private Label findAllLabelsByRoot(Label label){
         List<Label> labelList = labelService.findLabel(label);
@@ -109,10 +73,13 @@ public class LabelController {
         return label;
     }
 
-
-    @RequestMapping("/experiment")
-    public String experiment(ModelMap modelMap){
-        return "label/experiment";
+    /**
+     * 刷新标签数据中的labelNO
+     * 用于排序和归类
+     */
+    @RequestMapping("/init_label_no")
+    public void initLabelNo(){
+        labelService.initLabelNo();
     }
 
     /**
@@ -128,7 +95,7 @@ public class LabelController {
         if(StringUtils.hasText(fId)){
             Label label = labelService.findById(Long.valueOf(fId));
             if(label != null){
-                Long labelId = labelService.addLabel(labelName, label.getLabelLevel() + 1, Long.valueOf(fId));
+                Long labelId = labelService.addLabel(labelName, label);
                 rootLabel = null;
                 //添加日志
                 HttpSession session = request.getSession();
@@ -143,53 +110,6 @@ public class LabelController {
             }
         }
         return null;
-    }
-
-    /**
-     * 移动某一个标签
-     * @param labelId
-     * @param request
-     * @return
-     */
-    @RequestMapping("/move/label")
-    @ResponseBody
-    public String moveLabel(@RequestParam String labelId, @RequestParam String targetId, @RequestParam String moveType, HttpServletRequest request){
-        Label label = labelService.findById(Long.valueOf(labelId));
-        Label targetLabel = null;
-        if(StringUtils.hasText(targetId)){
-            targetLabel = labelService.findById(Long.valueOf(targetId));
-        }
-        if(StringUtils.hasText(moveType) && targetLabel != null){
-            if(moveType.equals("next")){
-                Long selfFatherId = label.getFatherId();
-                Long fatherId = targetLabel.getFatherId();
-                if(selfFatherId.equals(fatherId)){
-                    //只是改变顺序
-                    List<Label> labelList = labelService.findLabel(selfFatherId);
-
-                }else{
-                    //修改父id，并且改变顺序
-                }
-            }
-            else if(moveType.equals("prev")){
-
-            }
-            else if(moveType.equals("inner")){
-
-            }
-        }
-        //labelService.moveLabel(Long.valueOf(labelId), Long.valueOf(targetId));
-        rootLabel = null;
-        //添加日志
-        HttpSession session = request.getSession();
-        User loginUser = (User) session.getAttribute("loginUser");
-        UserRecord userRecord = new UserRecord();
-        userRecord.setAction(UserRecord.MOVE_LABEL);
-        userRecord.setCreateTime(new Date());
-        userRecord.setUserId(loginUser.getId());
-        userRecord.setSourceData(label.getFatherId() + "|" + labelId + "|" + targetId);
-        userRecordService.addRecord(userRecord);
-        return "done";
     }
 
     /**
@@ -241,6 +161,189 @@ public class LabelController {
         userRecordService.addRecord(userRecord);
         return "done";
     }
+
+    /**
+     * 移动某一个标签
+     * @param labelId  需要移动的标签
+     * @param targetId 移到的目标标签
+     * @param moveType 移动类型
+     * @param request
+     * @return
+     */
+    @RequestMapping("/move/label")
+    @ResponseBody
+    public String moveLabel(@RequestParam String labelId, @RequestParam String targetId, @RequestParam String moveType, HttpServletRequest request){
+        Label moveLabel = null;
+        Label targetLabel = null;
+        Label moveFatherLabel = null;
+        Label targetFatherLabel = null;
+        List<Label> moveLabelList = null;
+        List<Label> targetLabelList = null;
+        if(StringUtils.hasText(targetId) && StringUtils.hasText(labelId)){
+            moveLabel = labelService.findById(Long.valueOf(labelId));
+            moveFatherLabel = labelService.findById(moveLabel.getFatherId());
+            moveLabelList = labelService.findLabel(moveLabel.getFatherId());
+            targetLabel = labelService.findById(Long.valueOf(targetId));
+            targetFatherLabel = labelService.findById(targetLabel.getFatherId());
+            targetLabelList = labelService.findLabel(targetLabel.getFatherId());
+        }
+        if(StringUtils.hasText(moveType)){
+            if(moveType.equals("inner")){
+                //如果是inner
+                //将移动标签从移动标签集合中删除
+                moveLabelList.remove(moveLabel);
+                //获取目标标签的子标签集合
+                List<Label> targetLabelSonList = labelService.findLabel(targetLabel.getId());
+                //将移动标签添加到目标标签的子标签集合汇总
+                targetLabelSonList.add(moveLabel);
+                //刷新两个List的labelNo
+                targetLabelSonList = LabelUtil.flushLabelNo(targetLabel, targetLabelSonList);
+                moveLabelList = LabelUtil.flushLabelNo(moveFatherLabel, moveLabelList);
+                //将结果更新到数据库
+                Integer number = labelService.updateLabel(targetLabel, targetLabelSonList);
+                Integer number2 = labelService.updateLabel(moveFatherLabel, moveLabelList);
+            }else{
+                if(moveLabel.getFatherId().equals(targetLabel.getFatherId())){
+                    //删除移动的标签
+                    moveLabelList.remove(moveLabel);
+                    if(moveType.equals("next")){
+                        //将标签添加到目标标签的后面
+                        moveLabelList.add(moveLabelList.indexOf(targetLabel) + 1, moveLabel);
+                    }
+                    else if(moveType.equals("prev")){
+                        //将标签添加到目标标签的前面
+                        Integer targetLabelIndex = moveLabelList.indexOf(targetLabel);
+                        if(targetLabelIndex == 0){
+                            LinkedList<Label> moveLabelLinkedList = new LinkedList<Label>(moveLabelList);
+                            moveLabelLinkedList.addFirst(moveLabel);
+                            moveLabelList = new ArrayList<Label>(moveLabelLinkedList);
+                        }else{
+                            moveLabelList.add(moveLabelList.indexOf(targetLabel) - 1, moveLabel);
+                        }
+                    }
+                    //刷新List的labelNo
+                    moveLabelList = LabelUtil.flushLabelNo(moveFatherLabel, moveLabelList);
+                    //将结果更新到数据库
+                    Integer number = labelService.updateLabel(moveFatherLabel, moveLabelList);
+                }
+                else{
+                    //如果两个标签的父ID不一样
+                    //将移动标签从移动标签的集合中删除
+                    moveLabelList.remove(moveLabel);
+                    //将移动标签添加到目标标签集合的中的目标标签的前面或后面
+                    if(moveType.equals("next")){
+                        targetLabelList.add(targetLabelList.indexOf(targetLabel) + 1, moveLabel);
+                    }
+                    else if(moveType.equals("prev")){
+                        Integer targetLabelIndex = targetLabelList.indexOf(targetLabel);
+                        if(targetLabelIndex == 0){
+                            LinkedList<Label> targetLabelLinkedList = new LinkedList<Label>(targetLabelList);
+                            targetLabelLinkedList.addFirst(moveLabel);
+                            targetLabelList = new ArrayList<Label>(targetLabelLinkedList);
+                        }else{
+                            targetLabelList.add(targetLabelList.indexOf(targetLabel) - 1, moveLabel);
+                        }
+                    }
+                    //刷新两个List的labelNo
+                    targetLabelList = LabelUtil.flushLabelNo(targetFatherLabel, targetLabelList);
+                    moveLabelList = LabelUtil.flushLabelNo(moveFatherLabel, moveLabelList);
+                    //将结果更新到数据库
+                    Integer number = labelService.updateLabel(targetFatherLabel, targetLabelList);
+                    Integer number2 = labelService.updateLabel(moveFatherLabel, moveLabelList);
+                }
+            }
+        }
+        rootLabel = null;
+        //添加日志
+        HttpSession session = request.getSession();
+        User loginUser = (User) session.getAttribute("loginUser");
+        UserRecord userRecord = new UserRecord();
+        userRecord.setAction(UserRecord.MOVE_LABEL);
+        userRecord.setCreateTime(new Date());
+        userRecord.setUserId(loginUser.getId());
+        //userRecord.setSourceData(label.getFatherId() + "|" + labelId + "|" + targetId);
+        //userRecordService.addRecord(userRecord);
+        return "done";
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @RequestMapping("/all")
+    @ResponseBody
+    public List<Label> getAllLabel(@PathVariable Integer rootTag){
+        if(rootLabel != null){
+            return rootLabel.getSonLabels();
+        }
+        Label root = labelService.findById(1L);
+        root = findAllLabelsByRoot(root);
+        rootLabel = root;
+        return rootLabel.getSonLabels();
+    }
+
+
+
+
+    /**
+     * 获取某个节点下的标签集合
+     * @param fatherId
+     * @return
+     */
+    @RequestMapping("/label_list/{fatherId}")
+    @ResponseBody
+    public List<Label> getLabelByFatherId(@PathVariable String fatherId){
+        List<Label> labelList = labelService.findLabel(Long.valueOf(fatherId));
+        return labelList;
+    }
+
+
+
+
+
+
+
+    @RequestMapping("/experiment")
+    public String experiment(ModelMap modelMap){
+        return "label/experiment";
+    }
+
+
+
+
+
+
+
+
 
 
     /**
