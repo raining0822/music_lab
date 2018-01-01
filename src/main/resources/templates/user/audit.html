@@ -65,10 +65,10 @@
 <body>
 <div class="container-fluid">
     <div class="row login_head" style="margin-top: 5px;">
-        <a class="btn btn-default btn-sm"  type="button" href="/user/work/label" >打标签</a>
-        <a class="btn btn-info btn-sm"  type="button" href="/user/work/submit/" >已打完</a>
-        <a th:if="${session.loginUser.userType == 0 or session.loginUser.userType == 1}" class="btn btn-warning btn-sm"  type="button" href="/user/work/audit/" >待审核</a>
-        <a th:if="${session.loginUser.userType == 0 or session.loginUser.userType == 1}" class="btn btn-success btn-sm" style="margin-top: 0px;" type="button" href="/user/work/done">已审核</a>
+        <a class="btn btn-default btn-sm"  type="submit" href="/user/work/label" >打标签</a>
+        <a class="btn btn-info btn-sm" style="margin-top: 0px;" type="submit" href="/user/work/submit">已打完</a>
+        <a class="btn btn-warning btn-sm"  type="submit" href="/user/work/audit" >待审核</a>
+        <a class="btn btn-success btn-sm" style="margin-top: 0px;" type="submit" href="/user/work/done">已审核</a>
     </div>
     <div class="row login_middle">
         <table class="table table-hover">
@@ -92,8 +92,7 @@
                 <td><button th:if="${song.basicTag == 1}" type="button" class="btn btn-success btn-xs" style="margin-top: 0px;">基础</button> <button th:if="${song.reasonTag == 1}" type="button" class="btn btn-primary btn-xs">理性</button> <button th:if="${song.sensibilityTag == 1}" type="button" class="btn btn-info btn-xs">感性</button>
                 </td>
                 <td>
-                    <div th:if="${song.songStatus == 2}">打标签</div>
-                    <div th:if="${song.songStatus == 3}">待审核</div>
+                    <div th:if="${song.songStatus == 5}">待审核</div>
                     <div th:if="${song.songStatus == 4}">审核完毕
                         <button th:if="${song.auditResult == 'OK'}" type="button" class="btn btn-success btn-xs" style="margin-top: 0px;">通过</button>
                         <button th:if="${song.auditResult == 'PROBLEM'}" type="button" class="btn btn-warning btn-xs" style="margin-top: 0px;">有问题</button>
@@ -101,8 +100,7 @@
                 </td>
                 <td>
                     <a href="#" class="playSong" th:value="${song.id}">播放</a> |
-                    <a th:if="${song.songStatus == 2}" th:href="@{'/song/label/' + ${song.id}}"  href="/song/label">打标签</a> |
-                    <a th:if="${song.songStatus == 2}" class="songSubmitBtn" th:value="${song.id}"  href="javascript:void(0);">提交审核</a>
+                    <a th:if="${song.songStatus == 5}" th:href="@{'/song/audit/' + ${song.id}}"  href="/song/audit">审核</a> |
                 </td>
             </tr>
 
@@ -121,7 +119,7 @@
                     var songId = $(this).attr("value");
                     $.ajax({
                         type:"POST",
-                        url:"/user/submit/" + songId,
+                        url:"/song/submit/" + songId,
                         success : function(data){
                             if(data == "success"){
                                 alert("操作成功！");

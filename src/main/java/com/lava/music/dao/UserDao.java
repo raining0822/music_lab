@@ -32,7 +32,9 @@ public interface UserDao {
     Integer updatePwd(Long id, String newPwd);
     Integer updateUser(User user, String[] ids);
 
-    Integer selectUserTaskCount(Long userId);
     List<TagAuth> selectUserTagAuth(String userId);
-    Integer insertUserTask(Long userId, List<Song> songList);
+
+    void updateUserAuditNumber(User user);
+
+    List<User> selectUserByType(int userType);
 }

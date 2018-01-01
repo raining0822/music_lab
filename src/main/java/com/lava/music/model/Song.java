@@ -1,5 +1,7 @@
 package com.lava.music.model;
 
+import java.util.Date;
+
 /**
  * Created by mac on 2017/8/23.
  */
@@ -9,7 +11,11 @@ public class Song {
     public static final Integer PUSHED = 1;
     public static final Integer PULLED = 2;
     public static final Integer SUBMITED = 3;
+    public static final Integer SUBMITPULLED = 5;
     public static final Integer AUDITED = 4;
+
+
+
 
     private Long id;
     private String songId;
@@ -20,6 +26,51 @@ public class Song {
     private String realAudioUrl;
     private String picUrl;
     private Integer effect;
+    private Long taskUserId;
+    private Long auditUserId;
+    private String auditResult;
+    private Date taskTime;
+    private Date submitTime;
+
+    public Date getSubmitTime() {
+        return submitTime;
+    }
+
+    public void setSubmitTime(Date submitTime) {
+        this.submitTime = submitTime;
+    }
+
+    public Long getTaskUserId() {
+        return taskUserId;
+    }
+
+    public void setTaskUserId(Long taskUserId) {
+        this.taskUserId = taskUserId;
+    }
+
+    public Long getAuditUserId() {
+        return auditUserId;
+    }
+
+    public void setAuditUserId(Long auditUserId) {
+        this.auditUserId = auditUserId;
+    }
+
+    public String getAuditResult() {
+        return auditResult;
+    }
+
+    public void setAuditResult(String auditResult) {
+        this.auditResult = auditResult;
+    }
+
+    public Date getTaskTime() {
+        return taskTime;
+    }
+
+    public void setTaskTime(Date taskTime) {
+        this.taskTime = taskTime;
+    }
 
     private String tsId;
     private String albumPic;

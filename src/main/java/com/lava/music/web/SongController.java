@@ -2,10 +2,7 @@ package com.lava.music.web;
 
 import com.alibaba.fastjson.JSONObject;
 import com.lava.music.model.*;
-import com.lava.music.service.LabelService;
-import com.lava.music.service.SongRecordService;
-import com.lava.music.service.SongService;
-import com.lava.music.service.UserRecordService;
+import com.lava.music.service.*;
 import com.lava.music.util.CommonUtil;
 import com.lava.music.util.HttpUtil;
 import com.lava.music.util.Page;
@@ -47,6 +44,10 @@ public class SongController {
 
     @Autowired
     private SongRecordService songRecordService;
+
+    @Autowired
+    private UserService userService;
+
 
 
     /**
@@ -121,12 +122,11 @@ public class SongController {
     /**
      * 跳转到单曲打标签页
      * @param songId
-     * @param pageNo 跳转时的页码，方便返回
      * @param modelMap
      * @return
      */
-    @RequestMapping("/label/{songId}/{pageNo}")
-    public String toSongLabel(@PathVariable String songId,@PathVariable Integer pageNo,ModelMap modelMap){
+    @RequestMapping("/label/{songId}")
+    public String toSongLabel(@PathVariable String songId,ModelMap modelMap, HttpServletRequest request){
         //查询单曲信息
         Song song = songService.findById(songId);
         modelMap.addAttribute("song", song);
@@ -134,8 +134,18 @@ public class SongController {
         List<Label> labelList = labelService.findLabelBySongId(songId);
 
         modelMap.addAttribute("labelList", labelList);
-        modelMap.addAttribute("pageNo", pageNo);
         return "song/song_label";
+    }
+
+    @RequestMapping("/audit/{songId}")
+    public String toAuditLabel(@PathVariable String songId,ModelMap modelMap, HttpServletRequest request){
+        //查询单曲信息
+        Song song = songService.findById(songId);
+        modelMap.addAttribute("song", song);
+        //查询标签信息
+        List<Label> labelList = labelService.findLabelBySongId(songId);
+        modelMap.addAttribute("labelList", labelList);
+        return "user/audit_label";
     }
 
 
@@ -143,12 +153,13 @@ public class SongController {
      * 给一首单曲打上标签，多个标签
      * @param songId
      * @param labelIds
-     * @param pageNo
      * @param request
      * @return
      */
-    @RequestMapping("/label/add/{songId}/{labelIds}/{pageNo}")
-    public String addLabel(@PathVariable String songId, @PathVariable String labelIds, @PathVariable Integer pageNo, HttpServletRequest request){
+    @RequestMapping("/label/add/{songId}/{labelIds}")
+    public String addLabel(@PathVariable String songId, @PathVariable String labelIds,HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User loginUser = (User) session.getAttribute("loginUser");
         String labelIdsStr = labelIds;
         if(StringUtils.hasText(labelIds) && labelIds.contains("_")){
             if(labelIds.endsWith("_")){
@@ -156,17 +167,30 @@ public class SongController {
                 labelIds = labelIds.replace("_",",");
             }
         }
-        songService.addLabels(songId, labelIds);
+        songService.addLabels(songId, labelIds, loginUser.getId());
         //添加日志
-        HttpSession session = request.getSession();
-        User loginUser = (User) session.getAttribute("loginUser");
         UserRecord userRecord = new UserRecord();
         userRecord.setAction(UserRecord.SONG_ADD_LABEL);
         userRecord.setCreateTime(new Date());
         userRecord.setUserId(loginUser.getId());
         userRecord.setSourceData(songId + "|" + labelIds);
         userRecordService.addRecord(userRecord);
-        return "redirect:/song/list/" + pageNo;
+        return "redirect:/user/work/label";
+    }
+
+    @RequestMapping("/audit/add/{songId}/{labelIds}")
+    public String auditLabel(@PathVariable String songId, @PathVariable String labelIds,HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User loginUser = (User) session.getAttribute("loginUser");
+        String labelIdsStr = labelIds;
+        if(StringUtils.hasText(labelIds) && labelIds.contains("_")){
+            if(labelIds.endsWith("_")){
+                labelIds = labelIds.substring(0, labelIds.lastIndexOf("_"));
+                labelIds = labelIds.replace("_",",");
+            }
+        }
+        songService.auditLabels(songId, labelIds, loginUser.getId());
+        return "redirect:/user/work/audit";
     }
 
     /**
@@ -190,6 +214,8 @@ public class SongController {
         }
         return "error";
     }
+
+
 
 
     /**
@@ -223,5 +249,11 @@ public class SongController {
             }
         }
         return song;
+    }
+
+    @RequestMapping("/test_task")
+    public void testTask(){
+        //songService.allotTask();
+        songService.allotAuditTask();
     }
 }

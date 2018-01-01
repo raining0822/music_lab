@@ -108,7 +108,7 @@
             </div>
             <div class="col-md-4" style="float: right;margin-top: 5px;">
                 <a type="button" class="btn btn-primary btn-show" id="saveLabel">保存</a>
-                <a th:href="@{/user/work/label}" href="/user/work/label" type="button" class="btn btn-primary btn-show">返回列表</a>
+                <a th:href="@{/user/work/audit}" href="/user/work/audit" type="button" class="btn btn-primary btn-show">返回列表</a>
             </div>
         </div>
         <div class="row" style="margin-left: 5px; margin-top: 5px; width: 100%;" id="labelShow">
@@ -203,10 +203,12 @@
                     alert("请至少选择一个标签！");
                     return;
                 }
-                $.each(song_label_ids, function(i,e){
-                    labelIdsStr += (e + "_");
-                })
-                window.location.href = "/song/label/add/" + [[${song.id}]] + "/" + labelIdsStr + "/";
+                if(confirm("审核无误了吗？")){
+                    $.each(song_label_ids, function(i,e){
+                        labelIdsStr += (e + "_");
+                    })
+                    window.location.href = "/song/audit/add/" + [[${song.id}]] + "/" + labelIdsStr + "/";
+                }
             });
 
 

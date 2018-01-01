@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
@@ -17,6 +18,7 @@ import java.util.List;
  * Created by mac on 2017/8/14.
  */
 @SpringBootApplication
+@EnableScheduling
 public class ApplicationRun extends WebMvcConfigurerAdapter {
     public static void main(String[] args){
         SpringApplication.run(ApplicationRun.class, args);

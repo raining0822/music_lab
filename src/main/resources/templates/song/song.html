@@ -88,7 +88,7 @@
                     <td class="songName" ><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.songName}"></div></td>
                     <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.artistName}"></div></td>
                     <td ><div style="height: 23px; overflow: hidden;" th:value="${song.id}"  class="songLabel"></div></td>
-                    <td><div th:if="${song.songStatus == 0}" >等待分配</div> <div th:if="${song.songStatus == 1}" >已分配</div> <div th:if="${song.songStatus == 2}" >已领取</div><div th:if="${song.songStatus == 3}" >待审核</div> <div th:if="${song.songStatus == 4}" >审核完毕</div> </td>
+                    <td><div th:if="${song.songStatus == 0}" >等待分配</div> <div th:if="${song.songStatus == 1}" >已推送</div> <div th:if="${song.songStatus == 2}" >已领取</div><div th:if="${song.songStatus == 3}" >待审核</div> <div th:if="${song.songStatus == 4}" >审核完毕</div> </td>
                     <td>
                         <a href="#" class="playSong" th:value="${song.id}">播放</a> |
                         <a th:if="${(song.songStatus == 0) || (song.songStatus == 4)}" href="#" th:value="${song.id}">推送 <input type="checkbox" th:value="${song.id}"/></a>

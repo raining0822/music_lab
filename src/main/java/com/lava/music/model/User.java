@@ -16,7 +16,35 @@ public class User {
     private Date lastLoginTime;
     private Integer userType;
     private String userTypeName;
+    private Integer taskNumber;
+    private Integer submitNumber;
+    private Integer auditNumber;
     private List<TagAuth> tagAuthList;
+
+
+    public Integer getTaskNumber() {
+        return taskNumber;
+    }
+
+    public void setTaskNumber(Integer taskNumber) {
+        this.taskNumber = taskNumber;
+    }
+
+    public Integer getSubmitNumber() {
+        return submitNumber;
+    }
+
+    public void setSubmitNumber(Integer submitNumber) {
+        this.submitNumber = submitNumber;
+    }
+
+    public Integer getAuditNumber() {
+        return auditNumber;
+    }
+
+    public void setAuditNumber(Integer auditNumber) {
+        this.auditNumber = auditNumber;
+    }
 
     public List<TagAuth> getTagAuthList() {
         return tagAuthList;

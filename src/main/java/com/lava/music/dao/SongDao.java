@@ -46,4 +46,17 @@ public interface SongDao {
     Integer updateSongStatus(List<Song> songList, Integer songStatus);
 
     List<Song> selectUserTaskSongFromTask(Long userId);
+    List<Song> selectUserSubmitSong(Long userId);
+    List<Song> selectUserAuditSong(Long userId);
+    List<Song> selectUserDoneSong(Long userId);
+
+    void updateSongTagFlag(Song song);
+    void updateSongTagFlag(Long songId);
+
+    List<Song> selectSongBySongStatus(int songStatus);
+
+    void updateSongs(List<Song> taskList);
+    Integer updateSongStatusAndSubmitTime(Song song);
+
+    void updateSongsOfAudit(List<Song> taskList);
 }

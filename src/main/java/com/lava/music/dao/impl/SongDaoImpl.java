@@ -4,17 +4,18 @@ import com.lava.music.dao.BaseDao;
 import com.lava.music.dao.SongDao;
 import com.lava.music.model.Label;
 import com.lava.music.model.Song;
+import com.lava.music.model.SongRecord;
 import com.lava.music.model.TagAuth;
+import com.lava.music.util.LabelUtil;
 import com.lava.music.util.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by mac on 2017/8/23.
@@ -37,6 +38,7 @@ public class SongDaoImpl extends BaseDao implements SongDao {
 
     @Override
     public Integer update(Song song) {
+
         return null;
     }
 
@@ -89,17 +91,17 @@ public class SongDaoImpl extends BaseDao implements SongDao {
 
     @Override
     public void addLabels(Long songId, String labelIds) {
-        String sql = "select label.* from r_song_label as rsl inner join label on rsl.labelId = label.id  where rsl.songId = ? and label.effect = 1 and rsl.effect = 1;";
-        RowMapper<Label> labelRowMapper = new BeanPropertyRowMapper<Label>(Label.class);
-        List<Label> labelList = jdbcTemplate.query(sql, labelRowMapper, songId);
-        String[] labelArr = labelIds.split(",");
-        for(String labelId : labelArr){
-            addLabel(songId, Long.valueOf(labelId));
-        }
-        for(Label label : labelList){
-            if(!labelIds.contains(String.valueOf(label.getId()))){
-                delLabel(songId, label.getId());
+        if(StringUtils.hasText(labelIds)){
+            //删除单曲上打的标签
+            String deleteSql = "delete from r_song_label where songId = ?;";
+            jdbcTemplate.update(deleteSql, songId);
+            //将新的标签和单曲关系入库
+            List<Object[]> params = new ArrayList<Object[]>();
+            String insertSql = "insert into r_song_label(songId, labelId, effect)values(?,?,?);";
+            for(String labelId : labelIds.split(",")){
+                params.add(new Object[]{songId, labelId, 1});
             }
+            jdbcTemplate.batchUpdate(insertSql, params);
         }
     }
 
@@ -231,9 +233,16 @@ public class SongDaoImpl extends BaseDao implements SongDao {
 
 
     public Integer updateSongStatus(Song song){
-        String sql = "update song set songStatus = ? where id = ?;";
-        return jdbcTemplate.update(sql, song.getSongStatus(), song.getId());
+        String sql = "update song set songStatus = ?,auditResult = ?  where id = ?;";
+        return jdbcTemplate.update(sql, song.getSongStatus(), song.getAuditResult(), song.getId());
     }
+
+    public Integer updateSongStatusAndSubmitTime(Song song){
+        String sql = "update song set songStatus = ?, submitTime = ? where id = ?;";
+        return jdbcTemplate.update(sql, song.getSongStatus(), song.getSubmitTime(), song.getId());
+    }
+
+
 
     @Override
     public Integer updateSongStatus(List<Song> songList, Integer songStatus) {
@@ -248,9 +257,78 @@ public class SongDaoImpl extends BaseDao implements SongDao {
 
     @Override
     public List<Song> selectUserTaskSongFromTask(Long userId) {
-        String sql = "select s.* from song as s INNER JOIN user_task AS ut ON s.id = ut.songId INNER JOIN song_record AS sr ON sr.songId= ut.songId WHERE ut.userId = ? AND sr.action = '1' order by sr.createTime desc;";
+        String sql = "select * from song where taskUserId = ? and songStatus = 2 order by taskTime desc;";
         RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
         return jdbcTemplate.query(sql, rowMapper, userId);
+    }
+
+    public void updateSongTagFlag(Long songId){
+        String sql1 = "update song set basicTag = 0, reasonTag = 0, sensibilityTag = 0 where id = ?;";
+        jdbcTemplate.update(sql1, songId);
+    }
+
+    @Override
+    public List<Song> selectSongBySongStatus(int songStatus) {
+        String sql = "select * from song where songStatus = ?;";
+        RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        return jdbcTemplate.query(sql, rowMapper, songStatus);
+    }
+
+    @Override
+    public void updateSongs(List<Song> taskList) {
+        List<Object[]> params = new ArrayList<Object[]>();
+        String sql = "update song set songStatus = ?, taskTime = ?, taskUserId = ? where id = ?;";
+        for(Song song : taskList){
+            params.add(new Object[]{song.getSongStatus(), song.getTaskTime(), song.getTaskUserId(), song.getId()});
+        }
+        jdbcTemplate.batchUpdate(sql, params);
+    }
+
+    @Override
+    public void updateSongsOfAudit(List<Song> taskList) {
+        List<Object[]> params = new ArrayList<Object[]>();
+        String sql = "update song set auditUserId = ?, songStatus = ? where id = ?;";
+        for(Song song : taskList){
+            params.add(new Object[]{song.getAuditUserId(), song.getSongStatus(), song.getId()});
+        }
+        jdbcTemplate.batchUpdate(sql, params);
+    }
+
+    @Override
+    public List<Song> selectUserSubmitSong(Long userId) {
+        String sql = "select * from song where taskUserId = ? and songStatus in (3,4) order by taskTime desc;";
+        RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        return jdbcTemplate.query(sql, rowMapper, userId);
+    }
+
+    @Override
+    public List<Song> selectUserAuditSong(Long userId) {
+        String sql = "select * from song where auditUserId = ? and songStatus = 5 order by taskTime desc;";
+        RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        return jdbcTemplate.query(sql, rowMapper, userId);
+    }
+
+    @Override
+    public List<Song> selectUserDoneSong(Long userId) {
+        String sql = "select * from song where auditUserId = ? and songStatus = 4 order by taskTime desc;";
+        RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        return jdbcTemplate.query(sql, rowMapper, userId);
+    }
+
+    @Override
+    public void updateSongTagFlag(Song song) {
+        StringBuffer sql = new StringBuffer("update song set id = ?  ");
+        if(song.getBasicTag() != null){
+            sql.append(", basicTag = 1 ");
+        }
+        if(song.getReasonTag() != null){
+            sql.append(", reasonTag = 1 ");
+        }
+        if(song.getSensibilityTag() != null){
+            sql.append(", sensibilityTag = 1 ");
+        }
+        sql.append("where id = ?;");
+        jdbcTemplate.update(sql.toString(), song.getId(), song.getId());
     }
 
 

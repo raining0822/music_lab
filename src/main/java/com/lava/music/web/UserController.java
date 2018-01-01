@@ -1,9 +1,7 @@
 package com.lava.music.web;
 
-import com.lava.music.model.Song;
-import com.lava.music.model.TagAuth;
-import com.lava.music.model.User;
-import com.lava.music.model.UserRecord;
+import com.lava.music.model.*;
+import com.lava.music.service.LabelService;
 import com.lava.music.service.SongService;
 import com.lava.music.service.UserRecordService;
 import com.lava.music.service.UserService;
@@ -15,6 +13,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -37,6 +36,9 @@ public class UserController {
 
     @Autowired
     private SongService songService;
+
+    @Autowired
+    private LabelService labelService;
 
     /**
      * 跳转到登录页
@@ -278,33 +280,105 @@ public class UserController {
     }
 
     /**
-     * 用户领取自己的任务
+     * 用户查看自己的任务
      * @param modelMap
      * @param request
      * @return
      */
-    @RequestMapping("/work")
+    @RequestMapping("/work/label")
     public String toWork(ModelMap modelMap, HttpServletRequest request){
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("loginUser");
         List<Song> taskList = null;
+        //查询用户的标签权限
         List<TagAuth> tagAuthList = userService.findUserTagAuth(user.getId());
         if(tagAuthList == null || tagAuthList.size() < 1){
             modelMap.put("taskList", taskList);
             return "user/work";
         }
         //首先查询当前用户正在处理的任务数
-        Integer totalCount = userService.findWorkSongTotalCount(user);
-        if(totalCount < 100){
-            Integer pullCount = 100 - totalCount;
-            //算出还能添加多少任务
-            //从任务池中拉取增量任务（拉取的时候要进行判断，只有符合当前用户权限的任务才能拉取）
-            List<Song> pullList = songService.pullSongTask(user, pullCount);
-        }
+        //Integer totalCount = userService.findWorkSongTotalCount(user);
+        //if(totalCount < 100){
+        //Integer pullCount = 100 - totalCount;
+        //算出还能添加多少任务
+        //从任务池中拉取增量任务（拉取的时候要进行判断，只有符合当前用户权限的任务才能拉取）
+        //List<Song> pullList = songService.pullSongTask(user, pullCount);
+        //}
         //查询该用户的任务
-        taskList = songService.findUserTask(user.getId());
+        taskList = userService.findUserLabelTask(user.getId());
         modelMap.put("taskList", taskList);
         return "user/work";
+    }
+
+    @RequestMapping("/work/submit")
+    public String toSubmit(ModelMap modelMap, HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("loginUser");
+        List<Song> taskList = null;
+        //查询用户的标签权限
+        List<TagAuth> tagAuthList = userService.findUserTagAuth(user.getId());
+        if(tagAuthList == null || tagAuthList.size() < 1){
+            modelMap.put("taskList", taskList);
+            return "user/work";
+        }
+        //查询该用户的任务
+        taskList = userService.findUserSubmitTask(user.getId());
+        modelMap.put("taskList", taskList);
+        return "user/work";
+    }
+
+
+    @RequestMapping("/work/audit")
+    public String toAudit(ModelMap modelMap, HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("loginUser");
+        List<Song> taskList = null;
+        //查询用户的标签权限
+        List<TagAuth> tagAuthList = userService.findUserTagAuth(user.getId());
+        if(tagAuthList == null || tagAuthList.size() < 1){
+            modelMap.put("taskList", taskList);
+            return "user/work";
+        }
+        //查询该管理员的任务
+        taskList = userService.findUserAuditTask(user.getId());
+        modelMap.put("taskList", taskList);
+        return "user/audit";
+    }
+
+    @RequestMapping("/work/done")
+    public String toDone(ModelMap modelMap, HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("loginUser");
+        List<Song> taskList = null;
+        //查询用户的标签权限
+        List<TagAuth> tagAuthList = userService.findUserTagAuth(user.getId());
+        if(tagAuthList == null || tagAuthList.size() < 1){
+            modelMap.put("taskList", taskList);
+            return "user/work";
+        }
+        //查询该管理员的任务
+        taskList = userService.findUserDoneTask(user.getId());
+        modelMap.put("taskList", taskList);
+        return "user/audit";
+    }
+
+    /**
+     * 提交审核
+     * @param songId
+     * @param request
+     * @return
+     */
+    @RequestMapping("/submit/{songId}")
+    @ResponseBody
+    public String submitSong(@PathVariable String songId, HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("loginUser");
+        List<Label> songLabels = labelService.findLabelBySongId(songId);
+        if(songLabels.size() < 1){
+            return "no_label";
+        }
+        Integer number = userService.submit(Long.valueOf(songId), user.getId());
+        return "success";
     }
 
 

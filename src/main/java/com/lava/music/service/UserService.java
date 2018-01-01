@@ -35,8 +35,16 @@ public interface UserService {
 
     Integer updateUser(User user, String userAuthority);
 
-    Integer findWorkSongTotalCount(User user);
-
-
     List<TagAuth> findUserTagAuth(Long userId);
+
+    boolean checkSongByUser(Long userId, Long songId);
+
+    List<Song> findUserLabelTask(Long userId);
+    List<Song> findUserSubmitTask(Long userId);
+
+    List<Song> findUserAuditTask(Long userId);
+    List<Song> findUserDoneTask(Long userId);
+
+    Integer submit(Long userId, Long songId);
+
 }

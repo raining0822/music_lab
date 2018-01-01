@@ -124,7 +124,10 @@ public class LabelServiceImpl extends BaseService implements LabelService {
         return labelDao.updateLabelNo(sonList);
     }
 
-
+    @Override
+    public List<Label> findLabelByLabelNo(String labelNo) {
+        return labelDao.selectByLabelNo(labelNo);
+    }
 
 
 }

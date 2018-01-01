@@ -30,4 +30,6 @@ public interface LabelService {
     void updateLabelNo(Label label);
 
     Integer updateLabel(Label targetLabel, List<Label> targetLabelSonList);
+
+    List<Label> findLabelByLabelNo(String labelNo);
 }

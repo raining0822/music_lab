@@ -1,10 +1,12 @@
 package com.lava.music.web;
 
 import com.lava.music.model.Label;
+import com.lava.music.model.TagAuth;
 import com.lava.music.model.User;
 import com.lava.music.model.UserRecord;
 import com.lava.music.service.LabelService;
 import com.lava.music.service.UserRecordService;
+import com.lava.music.service.UserService;
 import com.lava.music.util.LabelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -33,8 +35,10 @@ public class LabelController {
     @Autowired
     private UserRecordService userRecordService;
 
-    private Label rootLabel = null;
+    @Autowired
+    private UserService userService;
 
+    private Label rootLabel = null;
 
     /**
      * 跳转到标签库页面
@@ -53,21 +57,21 @@ public class LabelController {
     @RequestMapping("/label_list/all")
     @ResponseBody
     public Label findAllLabels(){
-        /*if(rootLabel != null){
+        if(rootLabel != null){
             return rootLabel;
-        }*/
+        }
         Label root = labelService.findById(1L);
-        root = findAllLabelsByRoot(root);
+        root = initLabelSon(root);
         rootLabel = root;
         return root;
     }
 
-    private Label findAllLabelsByRoot(Label label){
+    private Label initLabelSon(Label label){
         List<Label> labelList = labelService.findLabel(label);
         if(labelList != null && labelList.size() > 0){
             label.setSonLabels(labelList);
             for(Label label1 : labelList){
-                findAllLabelsByRoot(label1);
+                initLabelSon(label1);
             }
         }
         return label;
@@ -218,7 +222,7 @@ public class LabelController {
                             moveLabelLinkedList.addFirst(moveLabel);
                             moveLabelList = new ArrayList<Label>(moveLabelLinkedList);
                         }else{
-                            moveLabelList.add(moveLabelList.indexOf(targetLabel) - 1, moveLabel);
+                            moveLabelList.add(moveLabelList.indexOf(targetLabel), moveLabel);
                         }
                     }
                     //刷新List的labelNo
@@ -241,7 +245,7 @@ public class LabelController {
                             targetLabelLinkedList.addFirst(moveLabel);
                             targetLabelList = new ArrayList<Label>(targetLabelLinkedList);
                         }else{
-                            targetLabelList.add(targetLabelList.indexOf(targetLabel) - 1, moveLabel);
+                            targetLabelList.add(targetLabelList.indexOf(targetLabel), moveLabel);
                         }
                     }
                     //刷新两个List的labelNo
@@ -267,49 +271,62 @@ public class LabelController {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @RequestMapping("/all")
     @ResponseBody
-    public List<Label> getAllLabel(@PathVariable Integer rootTag){
-        if(rootLabel != null){
-            return rootLabel.getSonLabels();
-        }
+    public List<Label> getAllLabel(HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User loginUser = (User) session.getAttribute("loginUser");
+        List<TagAuth> tagAuthList = userService.findUserTagAuth(loginUser.getId());
         Label root = labelService.findById(1L);
-        root = findAllLabelsByRoot(root);
-        rootLabel = root;
-        return rootLabel.getSonLabels();
+        //查询根标签下的三个标签
+        List<Label> rootSonList = labelService.findLabel(root.getId());
+        List<Label> userLabels = new ArrayList<Label>();
+        for(Label label : rootSonList){
+            String labelName = label.getLabelName();
+            for(TagAuth tagAuth : tagAuthList){
+                if(labelName.trim().equals(tagAuth.getName().trim())){
+                    label = initLabelSon(label);
+                    userLabels.add(label);
+                    break;
+                }
+            }
+        }
+        return userLabels;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -32,4 +32,6 @@ public interface LabelDao {
     Integer updateLabelNo(Label label);
 
     Integer updateLabelNo(List<Label> sonList);
+
+    List<Label> selectByLabelNo(String labelNo);
 }

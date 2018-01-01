@@ -1,12 +1,14 @@
 package com.lava.music.service.impl;
 
+import com.lava.music.dao.LabelDao;
+import com.lava.music.dao.SongDao;
+import com.lava.music.dao.SongRecordDao;
 import com.lava.music.dao.UserDao;
-import com.lava.music.model.Song;
-import com.lava.music.model.TagAuth;
-import com.lava.music.model.User;
+import com.lava.music.model.*;
 import com.lava.music.service.BaseService;
 import com.lava.music.service.UserService;
 import com.lava.music.util.CommonUtil;
+import com.lava.music.util.LabelUtil;
 import com.lava.music.util.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,15 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
     private UserDao userDao;
+
+    @Autowired
+    private SongDao songDao;
+
+    @Autowired
+    private SongRecordDao songRecordDao;
+
+    @Autowired
+    private LabelDao labelDao;
 
     @Override
     public List<User> findAll() {
@@ -100,16 +111,55 @@ public class UserServiceImpl extends BaseService implements UserService {
         return 0;
     }
 
-    @Override
-    public Integer findWorkSongTotalCount(User user) {
-        Long userId =  user.getId();
-        return userDao.selectUserTaskCount(userId);
-    }
 
     @Override
     public List<TagAuth> findUserTagAuth(Long userId) {
         return userDao.selectUserTagAuth(String.valueOf(userId));
     }
+
+    @Override
+    public boolean checkSongByUser(Long userId, Long songId) {
+        return false;
+    }
+
+    @Override
+    public List<Song> findUserLabelTask(Long userId) {
+        return songDao.selectUserTaskSongFromTask(userId);
+    }
+
+    @Override
+    public List<Song> findUserSubmitTask(Long userId) {
+        return songDao.selectUserSubmitSong(userId);
+    }
+
+    @Override
+    public List<Song> findUserAuditTask(Long userId) {
+        return songDao.selectUserAuditSong(userId);
+    }
+
+    @Override
+    public List<Song> findUserDoneTask(Long userId) {
+        return songDao.selectUserDoneSong(userId);
+    }
+
+    @Override
+    public Integer submit(Long songId, Long userId) {
+        Song song = songDao.selectById(songId);
+        if(song.getSongStatus() == 2){
+            song.setSongStatus(3);
+            song.setSubmitTime(new Date());
+            int num = songDao.updateSongStatusAndSubmitTime(song);
+            SongRecord songRecord = new SongRecord();
+            songRecord.setAction(SongRecord.SUBMIT_SONG);
+            songRecord.setCreateTime(new Date());
+            songRecord.setUserId(userId);
+            songRecord.setSongId(songId);
+            songRecordDao.insert(songRecord);
+            return num;
+        }
+        return 0;
+    }
+
 
 
 }

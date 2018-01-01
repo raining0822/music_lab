@@ -25,7 +25,6 @@ public interface SongService {
 
     Page<Song> findSongByLabelsPage(Page<Song> page, String labelIds);
 
-    void addLabels(String songId, String labelIds);
 
 
 
@@ -38,5 +37,11 @@ public interface SongService {
 
     List<Song> pullSongTask(User user, Integer count);
 
-    List<Song> findUserTask(Long userId);
+    void addLabels(String songId, String labelIds, Long userId);
+    void auditLabels(String songId, String labelIds, Long userId);
+
+
+    void allotTask();
+
+    void allotAuditTask();
 }

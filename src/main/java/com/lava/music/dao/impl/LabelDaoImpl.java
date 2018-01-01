@@ -158,4 +158,11 @@ public class LabelDaoImpl extends BaseDao implements LabelDao {
         int[] num = jdbcTemplate.batchUpdate(sql, params);
         return num.length;
     }
+
+    @Override
+    public List<Label> selectByLabelNo(String labelNo) {
+        String sql = "select * from label where labelNo like ? where effect = 1;";
+        RowMapper<Label> labelRowMapper = new BeanPropertyRowMapper<Label>(Label.class);
+        return jdbcTemplate.query(sql, labelRowMapper, labelNo + "%");
+    }
 }

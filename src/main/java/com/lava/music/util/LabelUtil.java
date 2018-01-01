@@ -5,6 +5,7 @@ import com.lava.music.model.Label;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -76,5 +77,22 @@ public class LabelUtil {
             i++;
         }
         return sonList;
+    }
+
+    public static boolean checkTag(List<Label> songLabels, String[] labelIds){
+        if(songLabels.size() != labelIds.length){
+            return false;
+        }
+        for(Label label : songLabels){
+            String labelId = String.valueOf(label.getId());
+            if(labelIds.length == songLabels.size()){
+                Arrays.sort(labelIds);
+                int result = Arrays.binarySearch(labelIds, labelId);
+                if(result < 0){
+                   return false;
+                }
+            }
+        }
+        return true;
     }
 }
