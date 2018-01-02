@@ -17,6 +17,15 @@ public class SongRecord {
     private Integer action;
     private Date createTime;
     private Long userId;
+    private String metaData;
+
+    public String getMetaData() {
+        return metaData;
+    }
+
+    public void setMetaData(String metaData) {
+        this.metaData = metaData;
+    }
 
     public Long getId() {
         return id;

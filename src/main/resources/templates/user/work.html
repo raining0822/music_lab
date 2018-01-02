@@ -89,11 +89,13 @@
                 <td class="songName" ><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.songName}"></div></td>
                 <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.artistName}"></div></td>
                 <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.albumName}"></div></td>
-                <td><button th:if="${song.basicTag == 1}" type="button" class="btn btn-success btn-xs" style="margin-top: 0px;">基础</button> <button th:if="${song.reasonTag == 1}" type="button" class="btn btn-primary btn-xs">理性</button> <button th:if="${song.sensibilityTag == 1}" type="button" class="btn btn-info btn-xs">感性</button>
+                <td><button th:if="${song.basicTag == 1}" type="button" class="btn btn-success btn-xs" style="margin-top: 0px;">基础</button>
+                    <button th:if="${song.reasonTag == 1}" type="button" class="btn btn-primary btn-xs">理性</button>
+                    <button th:if="${song.sensibilityTag == 1}" type="button" class="btn btn-info btn-xs">感性</button>
                 </td>
                 <td>
                     <div th:if="${song.songStatus == 2}">打标签</div>
-                    <div th:if="${song.songStatus == 3}">待审核</div>
+                    <div th:if="${song.songStatus == 5 or song.songStatus == 3}">待审核</div>
                     <div th:if="${song.songStatus == 4}">审核完毕
                         <button th:if="${song.auditResult == 'OK'}" type="button" class="btn btn-success btn-xs" style="margin-top: 0px;">通过</button>
                         <button th:if="${song.auditResult == 'PROBLEM'}" type="button" class="btn btn-warning btn-xs" style="margin-top: 0px;">有问题</button>
@@ -103,6 +105,7 @@
                     <a href="#" class="playSong" th:value="${song.id}">播放</a> |
                     <a th:if="${song.songStatus == 2}" th:href="@{'/song/label/' + ${song.id}}"  href="/song/label">打标签</a> |
                     <a th:if="${song.songStatus == 2}" class="songSubmitBtn" th:value="${song.id}"  href="javascript:void(0);">提交审核</a>
+                    <a th:if="${song.songStatus == 4}" th:href="@{'/song/look/' + ${song.id}}">查看标签</a>
                 </td>
             </tr>
 

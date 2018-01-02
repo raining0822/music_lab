@@ -13,15 +13,19 @@ public class UserRecord {
     public static final Integer ACTIVE_USER = 4;
     public static final Integer ADD_USER = 5;
     public static final Integer CHANGE_PWD = 6;
+
     public static final Integer SONG_ADD_LABEL = 7;
-    public static final Integer SONG_DEL_LABEL = 8;
-    public static final Integer UPDATE_LABEL = 9;//转移标签下的单曲到另一个标签
-    public static final Integer ADD_DIMENSION = 10;
-    public static final Integer ADD_LABEL = 11;
-    public static final Integer MOVE_LABEL = 12;//将标签移动到另一个维度下
-    public static final Integer DELETE_LABEL = 13;
-    public static final Integer DELETE_DIMENSION = 14;
-    public static final Integer EDIT_Label = 15;
+    public static final Integer SONG_AUDIT_LABEL = 8;
+    public static final Integer SONG_CHECK_LABEL = 9;
+    public static final Integer SONG_DEL_LABEL = 10;
+    public static final Integer SUBMIT = 11;
+    public static final Integer AUDIT = 12;
+
+    public static final Integer ADD_LABEL = 13;
+    public static final Integer MOVE_LABEL = 14;
+    public static final Integer DELETE_LABEL = 15;
+    public static final Integer EDIT_Label = 16;
+
 
     private Long id;
     private Long userId;

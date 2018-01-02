@@ -101,6 +101,7 @@
                 <td>
                     <a href="#" class="playSong" th:value="${song.id}">播放</a> |
                     <a th:if="${song.songStatus == 5}" th:href="@{'/song/audit/' + ${song.id}}"  href="/song/audit">审核</a> |
+                    <a th:if="${song.songStatus == 4}" th:href="@{'/song/see/' + ${song.id}}">查看标签</a>
                 </td>
             </tr>
 

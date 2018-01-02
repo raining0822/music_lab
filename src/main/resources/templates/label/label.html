@@ -180,6 +180,8 @@
                         success : function(data){
                             if(data == "son"){
                                 alert("该标签下有子标签，请先删除子标签！");
+                            }else if(data == "song"){
+                                alert("该标签已经被使用！");
                             }else if(data == "done"){
                                 alert("删除成功！");
                             }

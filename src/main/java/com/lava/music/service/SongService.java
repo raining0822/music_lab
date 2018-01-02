@@ -26,7 +26,7 @@ public interface SongService {
     Page<Song> findSongByLabelsPage(Page<Song> page, String labelIds);
 
 
-
+    Integer searchSongTotalCount(String keyword, Integer searchType);
 
     List<Song> findAll();
 
@@ -39,9 +39,14 @@ public interface SongService {
 
     void addLabels(String songId, String labelIds, Long userId);
     void auditLabels(String songId, String labelIds, Long userId);
-
+    void checkLabels(String songId, String labelIds, Long id);
 
     void allotTask();
 
     void allotAuditTask();
+
+
+    Page<Song> findSongBySearchPage(Page<Song> page, String keyword, Integer searchType);
+
+    void back();
 }

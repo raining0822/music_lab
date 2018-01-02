@@ -59,4 +59,10 @@ public interface SongDao {
     Integer updateSongStatusAndSubmitTime(Song song);
 
     void updateSongsOfAudit(List<Song> taskList);
+
+    Integer selectSearchTotalCount(String keyword, Integer searchType);
+
+    Page<Song> selectSearchBySearch(Page<Song> page, String keyword, Integer searchType);
+
+    void back();
 }

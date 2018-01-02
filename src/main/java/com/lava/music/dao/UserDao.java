@@ -37,4 +37,9 @@ public interface UserDao {
     void updateUserAuditNumber(User user);
 
     List<User> selectUserByType(int userType);
+    List<User> selectUserByType(int... userType);
+
+    void updateUserTaskNumber(User user);
+
+    void updateUserSubmitNumber(User user);
 }

@@ -15,13 +15,18 @@ public class TimeTask {
     @Autowired
     private SongService songService;
 
-    //@Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 1000*60*60*12)
     public void allotLabelTask(){
         songService.allotTask();
     }
 
-    //@Scheduled(cron = "0 0/2 8-20 * * ?")
+    @Scheduled(fixedRate = 1000*60*60*10)
     public void allAuditTask(){
         songService.allotAuditTask();
+    }
+
+    @Scheduled(fixedRate = 1000*60*60*8)
+    public void back(){
+        songService.back();
     }
 }

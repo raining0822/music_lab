@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.websocket.Session;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -256,12 +257,20 @@ public class UserController {
     @RequestMapping("/info/{userId}")
     public String userInfo(@PathVariable String userId, ModelMap modelMap){
         User user = userService.findById(userId);
-        //Integer addLabelCount = userRecordService.selectAddLabel(Long.valueOf(userId));
-        //Integer delLabelCount = userRecordService.selectDelLabel(Long.valueOf(userId));
-        Integer songCount = userRecordService.selectSong(Long.valueOf(userId));
-        //modelMap.addAttribute("addLabelCount", addLabelCount);
-        //modelMap.addAttribute("delLabelCount", delLabelCount);
-        modelMap.addAttribute("songCount", songCount);
+        modelMap.addAttribute("user", user);
+        return "user/info";
+    }
+
+    /**
+     * 获取某个用户的信息
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping("/message")
+    public String userMessage(ModelMap modelMap, HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User loginUser = (User) session.getAttribute("loginUser");
+        User user = userService.findById(String.valueOf(loginUser.getId()));
         modelMap.addAttribute("user", user);
         return "user/info";
     }

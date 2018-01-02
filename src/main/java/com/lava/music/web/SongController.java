@@ -56,12 +56,26 @@ public class SongController {
      * @param modelMap
      * @return
      */
-    @RequestMapping("/list/{pageNo}")
-    public String songList(@PathVariable Integer pageNo, ModelMap modelMap){
-        Integer totalCount = songService.findSongTotalCount();
+    @RequestMapping("/list/{searchType}/{keyword}/{pageNo}")
+    public String songList(@PathVariable Integer searchType, @PathVariable String keyword , @PathVariable Integer pageNo, ModelMap modelMap){
+        String searchKeyword = null;
+        if(StringUtils.hasText(keyword) && keyword.contains("%")){
+            try {
+                searchKeyword = URLDecoder.decode(keyword,"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }else{
+            searchKeyword = keyword;
+        }
+        Integer totalCount = songService.searchSongTotalCount(searchKeyword.trim(), searchType);
         Page<Song> page = new Page<Song>(pageNo, 10, totalCount);
-        page = songService.findSongByPage(page);
+        //page = songService.findSongByPage(page);
+        page = songService.findSongBySearchPage(page, searchKeyword, searchType);
         modelMap.addAttribute("page", page);
+        modelMap.addAttribute("keyword", keyword);
+        modelMap.addAttribute("searchKeyword", searchKeyword);
+        modelMap.addAttribute("searchType", searchType);
         return "song/song";
     }
 
@@ -148,6 +162,42 @@ public class SongController {
         return "user/audit_label";
     }
 
+    @RequestMapping("/look/{songId}")
+    public String toLookLabel(@PathVariable String songId,ModelMap modelMap, HttpServletRequest request){
+        //查询单曲信息
+        Song song = songService.findById(songId);
+        modelMap.addAttribute("song", song);
+        //查询标签信息
+        List<Label> labelList = labelService.findLabelBySongId(songId);
+        modelMap.addAttribute("labelList", labelList);
+        return "user/look_label";
+    }
+
+    @RequestMapping("/see/{songId}")
+    public String toSeeLabel(@PathVariable String songId,ModelMap modelMap, HttpServletRequest request){
+        //查询单曲信息
+        Song song = songService.findById(songId);
+        modelMap.addAttribute("song", song);
+        //查询标签信息
+        List<Label> labelList = labelService.findLabelBySongId(songId);
+        modelMap.addAttribute("labelList", labelList);
+        return "user/see_label";
+    }
+
+    @RequestMapping("/check/{songId}/{keyword}/{searchType}/{pageNo}")
+    public String toCheckLabel(@PathVariable String songId,ModelMap modelMap, HttpServletRequest request, @PathVariable Integer pageNo, @PathVariable Integer searchType, @PathVariable String keyword){
+        //查询单曲信息
+        Song song = songService.findById(songId);
+        modelMap.addAttribute("song", song);
+        //查询标签信息
+        List<Label> labelList = labelService.findLabelBySongId(songId);
+        modelMap.addAttribute("labelList", labelList);
+        modelMap.addAttribute("pageNo", pageNo);
+        modelMap.addAttribute("searchType", searchType);
+        modelMap.addAttribute("keyword", keyword);
+        return "user/check_label";
+    }
+
 
     /**
      * 给一首单曲打上标签，多个标签
@@ -178,6 +228,13 @@ public class SongController {
         return "redirect:/user/work/label";
     }
 
+    /**
+     * 管理员审核标签
+     * @param songId
+     * @param labelIds
+     * @param request
+     * @return
+     */
     @RequestMapping("/audit/add/{songId}/{labelIds}")
     public String auditLabel(@PathVariable String songId, @PathVariable String labelIds,HttpServletRequest request){
         HttpSession session = request.getSession();
@@ -191,6 +248,34 @@ public class SongController {
         }
         songService.auditLabels(songId, labelIds, loginUser.getId());
         return "redirect:/user/work/audit";
+    }
+
+    /**
+     * 超级管理员查阅标签
+     * @param songId
+     * @param labelIds
+     * @param request
+     * @return
+     *
+     */
+    @RequestMapping("/check/add/{songId}/{labelIds}/{searchType}/{keyword}/{pageNo}")
+    public String checkLabel(@PathVariable String songId, @PathVariable String labelIds,HttpServletRequest request, @PathVariable Integer pageNo, @PathVariable Integer searchType, @PathVariable String keyword){
+        HttpSession session = request.getSession();
+        User loginUser = (User) session.getAttribute("loginUser");
+        String labelIdsStr = labelIds;
+        if(StringUtils.hasText(labelIds) && labelIds.contains("_")){
+            if(labelIds.endsWith("_")){
+                labelIds = labelIds.substring(0, labelIds.lastIndexOf("_"));
+                labelIds = labelIds.replace("_",",");
+            }
+        }
+        songService.checkLabels(songId, labelIds, loginUser.getId());
+        try {
+            keyword = URLEncoder.encode(keyword, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return "redirect:/song/list/" + searchType + "/" + keyword  + "/" + pageNo;
     }
 
     /**

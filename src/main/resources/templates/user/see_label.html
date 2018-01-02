@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Lava音乐实验室</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="/css/bootstrap.min.css"/>
+    <style>
+        body{
+            background-color: #eeeeee;
+        }
+        .login_head{
+            /*height: 20%;*/
+            position: fixed;
+            background-color: #eeeeee;
+            padding-bottom: 5px;
+            border-bottom: 1px #d5d5d5 solid;
+            width: 100%;
+        }
+        .login_middle{
+            /*text-align: center;*/
+            margin-top: 120px;
+        }
+        .song_label{
+            margin-top: 5px;
+        }
+        .label_ul{
+            margin-top:10px;
+            /*float: left;*/
+            /*height: 500px;*/
+            overflow-y: auto;
+            list-style-type: none;
+            padding-left: 5px;
+            padding-right: 5px;
+            border-left: 1px solid #d5d5d5;
+
+        }
+        .label_ul>li{
+            text-align: left;
+            margin: 0 auto;
+            margin-top: 5px;
+            margin-left: 5px;
+            float: left;
+        }
+        .label_btn{
+            padding: 3px 5px 3px 5px;
+            font-weight: 100;
+            background-color: #adadad;
+            border-color: #adadad;
+            font-size: 10px;
+        }
+        .label_btn_selected{
+            padding: 3px 5px 3px 5px;
+            font-weight: 100;
+            background-color: #5cb85c;
+            border-color: #5cb85c;
+            font-size: 10px;
+        }
+        .dm_btn{
+            padding: 3px 5px 3px 5px;
+            font-weight: 100;
+            font-size: 11px;
+            background-color: #eeeeee;
+            border-color: #eeeeee;
+            color: #0f0f0f;
+        }
+        .type_btn{
+            padding: 3px 5px 3px 5px;
+            font-weight: 100;
+            font-size: 11px;
+            background-color: #8c8c8c;
+            border-color: #8c8c8c;
+        }
+        .login_head button{
+            font-size: 11px;
+            font-weight: 100;
+        }
+        .initLabel{
+            font-size: 11px;
+            font-weight: 100;
+            padding: 3px 5px 3px 5px;
+            margin-top: 5px;
+            margin-left: 5px;
+        }
+        .type-line{
+            clear: left;
+        }
+
+        .btn-show{
+            font-size: 11px;
+            font-weight: 100;
+            padding: 3px 5px 3px 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row login_head">
+        <div class="row btn-group btn-group-lg" role="group" style="width: 100%;" aria-label="...">
+            <div class="col-md-8" style="margin-top: 5px;">
+                <button type="button" class="btn btn-default" th:text="${song.id}">001</button>
+                <button type="button" class="btn btn-default" th:text="${song.songName}">流年</button>
+                <button type="button" class="btn btn-default" th:text="${song.artistName}">王菲</button>
+                <button type="button" class="btn btn-default" id="songPlay" th:value="${song.id}" >播放</button>
+            </div>
+            <div class="col-md-4" style="float: right;margin-top: 5px;">
+                <a th:href="@{/user/work/done}"  type="button" class="btn btn-primary btn-show">返回列表</a>
+            </div>
+        </div>
+        <div class="row" style="margin-left: 5px; margin-top: 5px; width: 100%;" id="labelShow">
+            <a type="button" class="btn btn-success initLabel" th:each="label : ${labelList}" th:text="${label.labelName}" th:value="${label.Id}"></a>
+        </div>
+    </div>
+    <div class="row login_middle">
+
+    </div>
+    <div class="row"></div>
+</div>
+<script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
+<script th:src="@{/js/bootstrap.min.js}" src="/js/bootstrap.min.js" ></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    ;(function($){
+        $(function(){
+            var $_row_middle = $(".login_middle");
+            var song_label_ids = new Array();
+
+            function handlerLabel(label, ul){
+                var songList = label.sonLabels;
+                if(songList != null && songList.length > 0){
+                    var $_songLabel = $("<li/>").addClass("type-line");
+                    var $_songLabel_a = $("<a/>").attr("type","button").attr("class","btn btn-info type_btn").attr("value",label.id).html(label.labelName);
+                    var $_div_line = $("<div/>").attr("class","type-line");
+                    $_songLabel.append($_div_line).append($_songLabel_a);
+                    ul.append($_songLabel);
+                    $.each(songList,function(i, e){
+                        handlerLabel(e, ul);
+                    });
+                }else{
+                    var $_songLabel = $("<li/>");
+                    var $_songLabel_a = $("<a/>").attr("type","button").attr("class","btn btn-info label_btn").attr("value", label.id).html(label.labelName);
+                    $_songLabel.append($_songLabel_a);
+                    ul.append($_songLabel);
+                    return;
+                }
+            }
+
+            $.ajax({
+                type : "GET",
+                url : "/label/all",
+                success : function(data){
+                    $.each(data, function(i , e){
+                        var $_ul = $("<ul/>").attr("class","label_ul");
+                        var $_li = $("<li/>");
+                        var $_btn = $("<button/>").attr("type", "button").attr("class","btn btn-warning btn-lg dm_btn").html(e.labelName);
+                        $_li.append($_btn);
+                        $_ul.append($_li);
+                        $_row_middle.append($_ul);
+                        var list = e.sonLabels;
+                        $.each(list, function(j, ele){
+                            handlerLabel(ele, $_ul);
+                        });
+                    });
+
+                    $(".initLabel").each(function(){
+                        song_label_ids.push($(this).attr("value"));
+                    })
+                    $(".label_btn").each(function () {
+                        if(song_label_ids.indexOf($(this).attr("value")) > -1){
+                            $(this).removeClass("label_btn")
+                            $(this).addClass("label_btn_selected");
+                        }
+                    });
+                }
+            });
+
+
+
+            $("#songPlay").on("click", function(){
+                var songId = $(this).attr('value');
+                $.ajax({
+                    type:"GET",
+                    url:"/song/" + songId,
+                    success : function(data){
+                        var audio_play = window.parent.audioFn;
+                        /* 向歌单中添加新曲目，第二个参数true为新增后立即播放该曲目，false则不播放 */
+                        audio_play.song = [];
+                        audio_play.newSong({
+                            'cover' : data.picUrl,
+                            'src' : data.realAudioUrl,
+                            'title' : data.songId + " | " + data.songName + " | " + data.artistName,
+                            'songId' : data.id
+                        },true);
+                    }
+                });
+            });
+        });
+    })(jQuery);
+    /*]]>*/
+</script>
+</body>
+</html>

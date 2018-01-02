@@ -97,11 +97,11 @@ public class UserDaoImpl extends BaseDao implements UserDao {
             if(user != null){
                 Integer userType = user.getUserType();
                 if(userType == 1){
-                    user.setUserTypeName("专业的耳朵");
-                }else if(userType == 0){
                     user.setUserTypeName("管理员");
-                }else if(userType == 2){
+                }else if(userType == 0){
                     user.setUserTypeName("超级管理员");
+                }else if(userType == 2){
+                    user.setUserTypeName("专业的耳朵");
                 }
                 user.setTagAuthList(selectUserTagAuth(String.valueOf(user.getId())));
             }
@@ -178,11 +178,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
     }
 
 
-    @Override
-    public void updateUserAuditNumber(User user) {
-        String sql = "update user set auditNumber = ? where id = ? ;";
-        jdbcTemplate.update(sql, user.getAuditNumber(), user.getId());
-    }
+
 
     @Override
     public List<User> selectUserByType(int userType) {
@@ -190,4 +186,38 @@ public class UserDaoImpl extends BaseDao implements UserDao {
         RowMapper<User> userRowMapper = new BeanPropertyRowMapper<User>(User.class);
         return jdbcTemplate.query(sql,userRowMapper, userType);
     }
+
+    @Override
+    public List<User> selectUserByType(int... userType) {
+        String sql = "select * from user where 1 = 1 ";
+        if(userType != null && userType.length > 0){
+            sql += " and userType in ( ";
+            for(int type : userType){
+                sql += type + ",";
+            }
+            sql = sql.substring(0,sql.length() - 1);
+            sql += " ) and effect = 1;";
+        }
+        RowMapper<User> userRowMapper = new BeanPropertyRowMapper<User>(User.class);
+        return jdbcTemplate.query(sql,userRowMapper);
+    }
+
+    @Override
+    public void updateUserTaskNumber(User user) {
+        String sql = "update user set taskNumber = ? where id = ?;";
+        jdbcTemplate.update(sql, user.getTaskNumber(), user.getId());
+    }
+
+    @Override
+    public void updateUserSubmitNumber(User user) {
+        String sql = "update user set submitNumber = ? where id = ?;";
+        jdbcTemplate.update(sql, user.getSubmitNumber(), user.getId());
+    }
+
+    @Override
+    public void updateUserAuditNumber(User user) {
+        String sql = "update user set auditNumber = ? where id = ? ;";
+        jdbcTemplate.update(sql, user.getAuditNumber(), user.getId());
+    }
+
 }

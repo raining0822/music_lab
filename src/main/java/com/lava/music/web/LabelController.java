@@ -5,6 +5,7 @@ import com.lava.music.model.TagAuth;
 import com.lava.music.model.User;
 import com.lava.music.model.UserRecord;
 import com.lava.music.service.LabelService;
+import com.lava.music.service.SongService;
 import com.lava.music.service.UserRecordService;
 import com.lava.music.service.UserService;
 import com.lava.music.util.LabelUtil;
@@ -37,6 +38,9 @@ public class LabelController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SongService songService;
 
     private Label rootLabel = null;
 
@@ -128,6 +132,10 @@ public class LabelController {
         List<Label> labelList = labelService.findLabel(Long.valueOf(labelId));
         if(labelList != null && labelList.size() > 0){
             return "son";
+        }
+        Integer count = songService.findSongLabelTotalCount(Long.valueOf(labelId));
+        if(count > 0){
+            return "song";
         }
         labelService.delLabel(Long.valueOf(labelId));
         rootLabel = null;
@@ -265,8 +273,8 @@ public class LabelController {
         userRecord.setAction(UserRecord.MOVE_LABEL);
         userRecord.setCreateTime(new Date());
         userRecord.setUserId(loginUser.getId());
-        //userRecord.setSourceData(label.getFatherId() + "|" + labelId + "|" + targetId);
-        //userRecordService.addRecord(userRecord);
+        userRecord.setSourceData(labelId + "|" + targetId + "|" + moveType);
+        userRecordService.addRecord(userRecord);
         return "done";
     }
 
@@ -277,21 +285,29 @@ public class LabelController {
         HttpSession session = request.getSession();
         User loginUser = (User) session.getAttribute("loginUser");
         List<TagAuth> tagAuthList = userService.findUserTagAuth(loginUser.getId());
-        Label root = labelService.findById(1L);
-        //查询根标签下的三个标签
-        List<Label> rootSonList = labelService.findLabel(root.getId());
+        if(rootLabel == null){
+            Label root = labelService.findById(1L);
+            root = initLabelSon(root);
+            rootLabel = root;
+        }
+        List<Label> rootSonList = rootLabel.getSonLabels();
         List<Label> userLabels = new ArrayList<Label>();
         for(Label label : rootSonList){
             String labelName = label.getLabelName();
             for(TagAuth tagAuth : tagAuthList){
                 if(labelName.trim().equals(tagAuth.getName().trim())){
-                    label = initLabelSon(label);
                     userLabels.add(label);
                     break;
                 }
             }
         }
-        return userLabels;
+        return  userLabels;
+    }
+
+
+    @RequestMapping("/experiment")
+    public String experiment(ModelMap modelMap){
+        return "label/experiment";
     }
 
 
@@ -349,10 +365,7 @@ public class LabelController {
 
 
 
-    @RequestMapping("/experiment")
-    public String experiment(ModelMap modelMap){
-        return "label/experiment";
-    }
+
 
 
 

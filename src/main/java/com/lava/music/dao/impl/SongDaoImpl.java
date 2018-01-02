@@ -42,6 +42,66 @@ public class SongDaoImpl extends BaseDao implements SongDao {
         return null;
     }
 
+
+    @Override
+    public Integer selectSearchTotalCount(String keyword, Integer searchType) {
+        StringBuffer sql = new StringBuffer("select count(0) from song where 1 = 1 ");
+        if(StringUtils.hasText(keyword) && !keyword.trim().equals("nodata")){
+            if(searchType != null && searchType == 0){
+                sql.append(" and songName like ? ");
+            }
+            else if(searchType != null && searchType == 1){
+                sql.append(" and albumName like ? ");
+            }
+            else if(searchType != null && searchType == 2){
+                sql.append(" and artistName like ? ");
+            }
+            return jdbcTemplate.queryForObject(sql.toString(), Integer.class, "%" + keyword + "%");
+        }
+        return jdbcTemplate.queryForObject(sql.toString(), Integer.class);
+    }
+
+    @Override
+    public Page<Song> selectSearchBySearch(Page<Song> page, String keyword, Integer searchType) {
+        StringBuffer sql = new StringBuffer("select * from song where 1 = 1 ");
+        RowMapper<Song> songRowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        List<Song> songList = null;
+        if(StringUtils.hasText(keyword) && !keyword.trim().equals("nodata")){
+            if(searchType != null && searchType == 0){
+                sql.append(" and songName like ? ");
+            }
+            else if(searchType != null && searchType == 1){
+                sql.append(" and albumName like ? ");
+            }
+            else if(searchType != null && searchType == 2){
+                sql.append(" and artistName like ? ");
+            }
+            sql.append(" order by id asc limit ?, ?; ");
+            songList = jdbcTemplate.query(sql.toString(), songRowMapper, "%" + keyword +"%", (page.getPageNo() - 1) * page.getPageSize(), page.getPageSize());
+        }else{
+            sql.append(" order by id asc limit ?, ?;");
+            songList = jdbcTemplate.query(sql.toString(), songRowMapper, (page.getPageNo() - 1) * page.getPageSize(), page.getPageSize());
+        }
+        page.setList(songList);
+        return page;
+    }
+
+    @Override
+    public void back() {
+        String sql = "update song set songStatus = 0 where songStatus = 4;";
+        jdbcTemplate.update(sql);
+    }
+
+    @Override
+    public Page<Song> selectByPage(Page<Song> page) {
+        RowMapper<Song> songRowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        List<Song> songList = null;
+        String sql = "select * from song order by id asc limit ?, ?;";
+        songList = jdbcTemplate.query(sql, songRowMapper, (page.getPageNo() - 1) * page.getPageSize(), page.getPageSize());
+        page.setList(songList);
+        return page;
+    }
+
     @Override
     public Song selectById(Long id) {
         String sql = "select * from song where id = ?;";
@@ -61,15 +121,7 @@ public class SongDaoImpl extends BaseDao implements SongDao {
         return jdbcTemplate.query(sql, songRowMapper);
     }
 
-    @Override
-    public Page<Song> selectByPage(Page<Song> page) {
-        RowMapper<Song> songRowMapper = new BeanPropertyRowMapper<Song>(Song.class);
-        List<Song> songList = null;
-        String sql = "select * from song order by id asc limit ?, ?;";
-        songList = jdbcTemplate.query(sql, songRowMapper, (page.getPageNo() - 1) * page.getPageSize(), page.getPageSize());
-        page.setList(songList);
-        return page;
-    }
+
 
     @Override
     public Page<Song> findSongByLabelPage(Page<Song> page, Long labelId) {
@@ -80,14 +132,7 @@ public class SongDaoImpl extends BaseDao implements SongDao {
         return page;
     }
 
-    @Override
-    public Page<Song> findSongByLabelsPage(Page<Song> page, String labelIds) {
-        String sql = "select distinct(s.id),s.songId,s.audioUrl,s.picId,s.songName,s.language,s.artistName,s.realAudioUrl,s.effect,s.picUrl,s.tsUrl from r_song_label as rsl left join song as s on rsl.songId = s.id where rsl.effect = 1 and rsl.labelId in (" + labelIds + ") order by s.id desc limit ?,?;";
-        RowMapper<Song> songRowMapper = new BeanPropertyRowMapper<Song>(Song.class);
-        List<Song> songList = jdbcTemplate.query(sql, songRowMapper, (page.getPageNo() - 1) * page.getPageSize(), page.getPageSize());
-        page.setList(songList);
-        return page;
-    }
+
 
     @Override
     public void addLabels(Long songId, String labelIds) {
@@ -194,8 +239,20 @@ public class SongDaoImpl extends BaseDao implements SongDao {
 
     @Override
     public Integer selectSongCountByLabels(String labelIds) {
-        String sql = "select count(distinct(songId)) from r_song_label where labelId in (" + labelIds + ") and effect = 1;";
-        return jdbcTemplate.queryForObject(sql, Integer.class);
+        //String sql = "select count(distinct(songId)) from r_song_label where labelId in (" + labelIds + ") and effect = 1;";
+        String sql = "SELECT COUNT(songId) AS number  FROM r_song_label WHERE labelId IN (" + labelIds + ") GROUP BY songId HAVING number = ?;";
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql, labelIds.split(",").length);
+        return maps.size();
+    }
+
+    @Override
+    public Page<Song> findSongByLabelsPage(Page<Song> page, String labelIds) {
+        //String sql = "select distinct(s.id),s.songId,s.audioUrl,s.picId,s.songName,s.language,s.artistName,s.realAudioUrl,s.effect,s.picUrl,s.tsUrl from r_song_label as rsl left join song as s on rsl.songId = s.id where rsl.effect = 1 and rsl.labelId in (" + labelIds + ") order by s.id desc limit ?,?;";
+        String sql = "SELECT s.*,rsl.songId, COUNT(rsl.songId) AS number  FROM r_song_label AS rsl INNER JOIN song AS s ON rsl.songId = s.id WHERE rsl.labelId IN (" + labelIds + ") GROUP BY rsl.songId HAVING number = ? order by s.id desc limit ?,?;";
+        RowMapper<Song> songRowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        List<Song> songList = jdbcTemplate.query(sql, songRowMapper, labelIds.split(",").length, (page.getPageNo() - 1) * page.getPageSize(), page.getPageSize());
+        page.setList(songList);
+        return page;
     }
 
 
@@ -294,9 +351,10 @@ public class SongDaoImpl extends BaseDao implements SongDao {
         jdbcTemplate.batchUpdate(sql, params);
     }
 
+
     @Override
     public List<Song> selectUserSubmitSong(Long userId) {
-        String sql = "select * from song where taskUserId = ? and songStatus in (3,4) order by taskTime desc;";
+        String sql = "select * from song where taskUserId = ? and songStatus in (3,4,5) order by taskTime desc;";
         RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
         return jdbcTemplate.query(sql, rowMapper, userId);
     }

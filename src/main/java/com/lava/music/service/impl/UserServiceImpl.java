@@ -149,6 +149,9 @@ public class UserServiceImpl extends BaseService implements UserService {
             song.setSongStatus(3);
             song.setSubmitTime(new Date());
             int num = songDao.updateSongStatusAndSubmitTime(song);
+            User user = userDao.selectById(userId);
+            user.setSubmitNumber(user.getSubmitNumber() + 1);
+            userDao.updateUserSubmitNumber(user);
             SongRecord songRecord = new SongRecord();
             songRecord.setAction(SongRecord.SUBMIT_SONG);
             songRecord.setCreateTime(new Date());

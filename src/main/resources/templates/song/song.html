@@ -66,20 +66,35 @@
 <div class="container-fluid">
     <div class="row login_head">
 
-    <div class="row">
-        <button id="pushBtn" class="btn btn-default" style="float: right;margin-right: 100px;margin-top: 5px;" >推送</button><button id="allPushBtn" class="btn btn-default" style="float: right;margin-right: 5px;margin-top: 5px;" >全选</button>
+    <div class="row" style="margin-top: 10px; margin-left: 0px;">
+        <div class="form-inline">
+            <div class="form-group">
+                <input type="text" class="form-control" id="keyword" name="keyword" th:value="${searchKeyword == 'nodata' ? '' : searchKeyword}" placeholder="请输入搜索信息"/>
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="searchType" id="searchType">
+                    <option th:selected="${searchType == 0}" value="0">单曲名称</option>
+                    <option th:selected="${searchType == 1}" value="1">专辑名称</option>
+                    <option th:selected="${searchType == 2}" value="2">艺人名称</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-default" id="searchBtn">搜索</button>
+            <input type="hidden" name="searchKeyword" id="searchKeyword" th:value="${keyword}"/>
+        </div>
+        <button id="pushBtn" class="btn btn-default btn-sm" style="float: right;margin-right: 100px;margin-top: 5px;" >推送</button><button id="allPushBtn" class="btn btn-default btn-sm" style="float: right;margin-right: 5px;margin-top: 5px;" >全选</button>
     </div>
     </div>
     <div class="row login_middle">
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th style="width: 5%;">单曲Id</th>
-                    <th style="width: 25%;">单曲名称</th>
+                    <th style="width: 10%;">单曲Id</th>
+                    <th style="width: 20%;">单曲名称</th>
                     <th style="width: 10%;">艺术家</th>
-                    <th style="width: 40%;">已有标签</th>
+                    <th style="width: 20%;">专辑名称</th>
+                    <th style="width: 15%;">已有标签</th>
                     <th style="width: 10%;">单曲状态</th>
-                    <th style="width: 10%;">操作</th>
+                    <th style="width: 15%;">操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,11 +102,17 @@
                     <td ><div style="height: 23px; overflow: hidden;" th:text="${song.id}"></div></td>
                     <td class="songName" ><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.songName}"></div></td>
                     <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.artistName}"></div></td>
-                    <td ><div style="height: 23px; overflow: hidden;" th:value="${song.id}"  class="songLabel"></div></td>
-                    <td><div th:if="${song.songStatus == 0}" >等待分配</div> <div th:if="${song.songStatus == 1}" >已推送</div> <div th:if="${song.songStatus == 2}" >已领取</div><div th:if="${song.songStatus == 3}" >待审核</div> <div th:if="${song.songStatus == 4}" >审核完毕</div> </td>
+                    <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.albumName}"></div></td>
+                    <td><button th:if="${song.basicTag == 1}" type="button" class="btn btn-success btn-xs" style="margin-top: 0px;">基础</button>
+                        <button th:if="${song.reasonTag == 1}" type="button" class="btn btn-primary btn-xs">理性</button>
+                        <button th:if="${song.sensibilityTag == 1}" type="button" class="btn btn-info btn-xs">感性</button>
+                    </td>
+                    <td><div th:if="${song.songStatus == 0}" >等待推送</div> <div th:if="${song.songStatus == 1}" >已推送</div> <div th:if="${song.songStatus == 2}" >已分配</div><div th:if="${song.songStatus == 3}" >待审核</div> <div th:if="${song.songStatus == 4}" >审核完毕</div> </td>
                     <td>
                         <a href="#" class="playSong" th:value="${song.id}">播放</a> |
-                        <a th:if="${(song.songStatus == 0) || (song.songStatus == 4)}" href="#" th:value="${song.id}">推送 <input type="checkbox" th:value="${song.id}"/></a>
+                        <a th:if="${song.songStatus == 4}" th:href="@{'/song/check/' + ${song.id} + '/' + ${keyword} + '/' + ${searchType} + '/' + ${pageNo}}" th:value="${song.id}">查看标签</a> |
+                        <a th:if="${song.songStatus == 0}" href="#" th:value="${song.id}">推送 <input type="checkbox" th:value="${song.id}"/></a>
+
                     </td>
                 </tr>
             </tbody>
@@ -100,9 +121,9 @@
     <div class="row page">
         <nav aria-label="...">
             <ul class="pagination" style="margin-top: 0px;">
-                <li><a th:href="@{'/song/list/' + ${page.pre}}" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-                <li th:each="i : ${#numbers.sequence(page.start,page.end)}"  th:class="${i == page.pageNo} ? 'active'" ><a th:href="@{'/song/list/' + ${i}}" href="#" th:text="${i}"></a></li>
-                <li><a th:href="@{'/song/list/'  + ${page.next}}" href="#">&raquo;</a></li>
+                <li><a th:href="@{'/song/list/' + ${searchType} + '/' + ${keyword} + '/' + ${page.pre}}" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+                <li th:each="i : ${#numbers.sequence(page.start,page.end)}"  th:class="${i == page.pageNo} ? 'active'" ><a th:href="@{'/song/list/'  + ${searchType} + '/' + ${keyword} + '/' + ${i}}" href="#" th:text="${i}"></a></li>
+                <li><a th:href="@{'/song/list/'  + ${searchType} + '/' + ${keyword} + '/'  + ${page.next}}" href="#">&raquo;</a></li>
             </ul>
             <form class="form-inline">
                 <div class="form-group">
@@ -143,7 +164,7 @@
                     alert("数字有误！");
                     return;
                 }
-                window.location.href = "/song/list/"  + jumpPage;
+                window.location.href = "/song/list/"  + [[${searchType}]] + '/' + [[${keyword}]]  + '/'  + jumpPage;
             });
             $(".playSong").on("click", function(){
                 var songId = $(this).attr('value');
@@ -195,6 +216,15 @@
             });
             $("#allPushBtn").on("click",function(){
                 $("input:checkbox").prop("checked", true);
+            });
+
+            $("#searchBtn").on("click", function(){
+                var keyword = $("#keyword").val();
+                var searchType = $("#searchType").val();
+                if(keyword == ''){
+                    keyword = 'nodata'
+                }
+                window.location.href = "/song/list/" + searchType + "/" + encodeURI(keyword) + "/" + 1;
             });
 
         });

@@ -64,7 +64,7 @@
                             <span class="glyphicon glyphicon-tags" aria-hidden="true"></span> 标签
                         </a>
                     </li>
-                    <li>
+                    <li th:if="${session.loginUser.userType == 0}">
                         <a class="btn btn-default btn-lg" href="/label/experiment" target="lava_main">
                             <span class="glyphicon glyphicon-education" aria-hidden="true"></span> 实验
                         </a>
@@ -74,8 +74,13 @@
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span> 账户
                         </a>
                     </li>
-                    <li>
-                        <a class="btn btn-default btn-lg" href="/song/list/1" style="margin-top: 30px;" target="lava_main">
+                    <li th:if="${session.loginUser.userType == 1 or session.loginUser.userType == 2}">
+                        <a  class="btn btn-default btn-lg" href="/user/message/" target="lava_main">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span> 账户
+                        </a>
+                    </li>
+                    <li th:if="${session.loginUser.userType == 0}">
+                        <a class="btn btn-default btn-lg" href="/song/list/0/nodata/1" style="margin-top: 30px;" target="lava_main">
                             <span class="glyphicon glyphicon-music" aria-hidden="true"></span> 曲库
                         </a>
                     </li>
@@ -83,7 +88,7 @@
             </div>
         </div>
         <div class="col-md-11">
-            <iframe id="lava_main" name="lava_main" class="lab_main" src="/song/list/1" frameborder="0" scrolling="yes"></iframe>
+            <iframe id="lava_main" name="lava_main" class="lab_main" src="/user/work/label" frameborder="0" scrolling="yes"></iframe>
         </div>
     </div>
     <div class="row"></div>
