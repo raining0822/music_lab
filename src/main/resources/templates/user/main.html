@@ -45,7 +45,7 @@
             <h3 style="color:#fff;">音乐实验室</h3>
         </div>
         <div class="col-md-9" style="text-align: right;z-index: 99;">
-            <a style="margin-top: 15px;" class="btn btn-primary" th:text="${session.loginUser.userName}"></a>
+            <a style="margin-top: 15px;" class="btn btn-primary" th:text="${session.loginUser.trueName}"></a>
             <a style="margin-top: 15px;" class="btn btn-primary" href="/user/pwd" target="lava_main">修改密码</a>
             <a style="margin-top: 15px;" class="btn btn-primary" href="/user/out">退出</a>
         </div>
@@ -54,7 +54,7 @@
         <div class="col-md-1">
             <div class="menu">
                 <ul>
-                    <li>
+                    <li th:if="${session.loginUser.userType == 1 or session.loginUser.userType == 2}">
                         <a class="btn btn-default btn-lg" href="/user/work/label" style="margin-top: 30px;" target="lava_main">
                              工作台
                         </a>
@@ -74,8 +74,13 @@
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span> 账户
                         </a>
                     </li>
-                    <li th:if="${session.loginUser.userType == 1 or session.loginUser.userType == 2}">
-                        <a  class="btn btn-default btn-lg" href="/user/message/" target="lava_main">
+                    <li th:if="${session.loginUser.userType == 1}">
+                        <a  class="btn btn-default btn-lg" href="/user/message/label" target="lava_main">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span> 账户
+                        </a>
+                    </li>
+                    <li th:if="${session.loginUser.userType == 2}">
+                        <a  class="btn btn-default btn-lg" href="/user/message/audit" target="lava_main">
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span> 账户
                         </a>
                     </li>
@@ -88,7 +93,9 @@
             </div>
         </div>
         <div class="col-md-11">
-            <iframe id="lava_main" name="lava_main" class="lab_main" src="/user/work/label" frameborder="0" scrolling="yes"></iframe>
+            <iframe th:if="${session.loginUser.userType == 2}" id="lava_main" name="lava_main" class="lab_main" src="/user/work/label" frameborder="0" scrolling="yes"></iframe>
+            <iframe th:if="${session.loginUser.userType == 1}" id="lava_main" name="lava_main" class="lab_main" src="/user/work/audit" frameborder="0" scrolling="yes"></iframe>
+            <iframe th:if="${session.loginUser.userType == 0}" id="lava_main" name="lava_main" class="lab_main" src="/song/list/0/nodata/1" frameborder="0" scrolling="yes"></iframe>
         </div>
     </div>
     <div class="row"></div>

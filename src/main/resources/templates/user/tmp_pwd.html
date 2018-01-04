@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>设置密码</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="/css/bootstrap.min.css"/>
+    <style>
+        body{
+            background-color: #eeeeee;
+        }
+        .login_head{
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row login_head"></div>
+    <div class="row login_middle">
+        <div class="alert alert-danger" role="alert" th:if="${msg != null}" th:text="${msg}">...</div>
+        <form action="/user/change/tmp_pwd" method="post" style="width:20%; margin-left: 30%;">
+            <div class="form-group">
+                <input type="password" class="form-control" id="newPwd" name="newPwd" placeholder="请输入新密码"/>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" id="newPwd2" name="newPwd2" placeholder="再次输入新密码"/>
+            </div>
+
+            <button type="submit" class="btn btn-primary">提  交</button>
+        </form>
+    </div>
+    <div class="row"></div>
+</div>
+
+<script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
+<script th:src="@{/js/bootstrap.min.js}" src="/js/bootstrap.min.js" ></script>
+
+</body>
+</html>

@@ -361,14 +361,14 @@ public class SongDaoImpl extends BaseDao implements SongDao {
 
     @Override
     public List<Song> selectUserAuditSong(Long userId) {
-        String sql = "select * from song where auditUserId = ? and songStatus = 5 order by taskTime desc;";
+        String sql = "SELECT s.*,u.trueName as userTrueName FROM song AS s INNER JOIN USER AS u ON s.taskUserId = u.id WHERE auditUserId = ? AND songStatus = 5 ORDER BY s.taskUserId DESC;";
         RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
         return jdbcTemplate.query(sql, rowMapper, userId);
     }
 
     @Override
     public List<Song> selectUserDoneSong(Long userId) {
-        String sql = "select * from song where auditUserId = ? and songStatus = 4 order by taskTime desc;";
+        String sql = "SELECT s.*,u.trueName as userTrueName FROM song AS s INNER JOIN USER AS u ON s.taskUserId = u.id WHERE auditUserId = ? AND songStatus = 4 ORDER BY s.taskUserId DESC;";
         RowMapper<Song> rowMapper = new BeanPropertyRowMapper<Song>(Song.class);
         return jdbcTemplate.query(sql, rowMapper, userId);
     }

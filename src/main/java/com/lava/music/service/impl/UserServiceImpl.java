@@ -74,10 +74,38 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
     }
 
+
     @Override
-    public User login(String userName, String userPwd) {
-        userPwd = CommonUtil.MD5(userPwd);
-        User user = userDao.selectByUserNameAndUserPwd(userName, userPwd);
+    public User addUser(String email, String trueName, Long fatherId, Integer userType, String userAuthority) {
+        User user = new User();
+        user.setSubmitNumber(0);
+        user.setTaskNumber(0);
+        user.setAuditNumber(0);
+        user.setCreateTime(new Date());
+        user.setEffect(1);
+        user.setEmail(email);
+        user.setFatherId(fatherId);
+        user.setTrueName(trueName);
+        user.setUserType(userType);
+        user.setTmpPwd(CommonUtil.randomStr(8));
+        if(StringUtils.hasText(userAuthority)){
+            String[] ids = userAuthority.split(",");
+            Long userId = userDao.insert(user, ids);
+            return userDao.selectById(userId);
+        }
+        return null;
+    }
+
+    @Override
+    public User login(String email, String userPwd) {
+        User user = userDao.selectByEmailAndUserPwd(email,CommonUtil.MD5(userPwd));
+        return user;
+    }
+
+
+    @Override
+    public User tmpLogin(String email, String userPwd) {
+        User user = userDao.selectByEmailAndUserTmpPwd(email, userPwd);
         return user;
     }
 
@@ -161,6 +189,11 @@ public class UserServiceImpl extends BaseService implements UserService {
             return num;
         }
         return 0;
+    }
+
+    @Override
+    public User findByUserTrueNameOrEmail(String trueName, String email) {
+        return userDao.findByUserTrueNameOrEmail(trueName, email);
     }
 
 

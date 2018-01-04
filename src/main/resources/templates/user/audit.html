@@ -65,8 +65,6 @@
 <body>
 <div class="container-fluid">
     <div class="row login_head" style="margin-top: 5px;">
-        <a class="btn btn-default btn-sm"  type="submit" href="/user/work/label" >打标签</a>
-        <a class="btn btn-info btn-sm" style="margin-top: 0px;" type="submit" href="/user/work/submit">已打完</a>
         <a class="btn btn-warning btn-sm"  type="submit" href="/user/work/audit" >待审核</a>
         <a class="btn btn-success btn-sm" style="margin-top: 0px;" type="submit" href="/user/work/done">已审核</a>
     </div>
@@ -74,12 +72,13 @@
         <table class="table table-hover">
             <thead>
             <tr>
-                <th style="width: 10%;">单曲Id</th>
-                <th style="width: 30%;">单曲名称</th>
+                <th style="width: 5%;">单曲Id</th>
+                <th style="width: 25%;">单曲名称</th>
                 <th style="width: 10%;">艺术家</th>
                 <th style="width: 10%;">专辑名称</th>
                 <th style="width: 15%;">已有标签</th>
-                <th style="width: 15%;">任务状态</th>
+                <th style="width: 15%;">音乐分析师</th>
+                <th style="width: 10%;">任务状态</th>
                 <th style="width: 10%;">操作</th>
             </tr>
             </thead>
@@ -91,6 +90,7 @@
                 <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.albumName}"></div></td>
                 <td><button th:if="${song.basicTag == 1}" type="button" class="btn btn-success btn-xs" style="margin-top: 0px;">基础</button> <button th:if="${song.reasonTag == 1}" type="button" class="btn btn-primary btn-xs">理性</button> <button th:if="${song.sensibilityTag == 1}" type="button" class="btn btn-info btn-xs">感性</button>
                 </td>
+                <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.userTrueName}"></div></td>
                 <td>
                     <div th:if="${song.songStatus == 5}">待审核</div>
                     <div th:if="${song.songStatus == 4}">审核完毕

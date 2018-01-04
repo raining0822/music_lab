@@ -31,6 +31,15 @@ public class Song {
     private String auditResult;
     private Date taskTime;
     private Date submitTime;
+    private String userTrueName;
+
+    public String getUserTrueName() {
+        return userTrueName;
+    }
+
+    public void setUserTrueName(String userTrueName) {
+        this.userTrueName = userTrueName;
+    }
 
     public Date getSubmitTime() {
         return submitTime;

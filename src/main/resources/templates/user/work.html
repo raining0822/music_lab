@@ -67,8 +67,6 @@
     <div class="row login_head" style="margin-top: 5px;">
         <a class="btn btn-default btn-sm"  type="button" href="/user/work/label" >打标签</a>
         <a class="btn btn-info btn-sm"  type="button" href="/user/work/submit/" >已打完</a>
-        <a th:if="${session.loginUser.userType == 0 or session.loginUser.userType == 1}" class="btn btn-warning btn-sm"  type="button" href="/user/work/audit/" >待审核</a>
-        <a th:if="${session.loginUser.userType == 0 or session.loginUser.userType == 1}" class="btn btn-success btn-sm" style="margin-top: 0px;" type="button" href="/user/work/done">已审核</a>
     </div>
     <div class="row login_middle">
         <table class="table table-hover">

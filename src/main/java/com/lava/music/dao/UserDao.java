@@ -23,7 +23,7 @@ public interface UserDao {
 
     Integer updateUserById(Long id);
 
-    User selectByUserNameAndUserPwd(String userName, String userPwd);
+    User selectByEmailAndUserPwd(String userName, String userPwd);
 
     User selectByUserName(String userName);
 
@@ -42,4 +42,8 @@ public interface UserDao {
     void updateUserTaskNumber(User user);
 
     void updateUserSubmitNumber(User user);
+
+    User findByUserTrueNameOrEmail(String trueName, String email);
+    User selectByEmailAndUserTmpPwd(String email, String userTmpPwd);
+
 }

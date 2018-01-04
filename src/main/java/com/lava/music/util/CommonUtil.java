@@ -48,4 +48,17 @@ public class CommonUtil {
         }
         return null;
     }
+
+    public static String randomStr(Integer length){
+        String a = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        char[] rands = new char[length];
+        for (int i = 0; i < rands.length; i++)
+        {
+            int rand = (int) (Math.random() * a.length());
+            rands[i] = a.charAt(rand);
+        }
+        return new String(rands);
+    }
+
+
 }

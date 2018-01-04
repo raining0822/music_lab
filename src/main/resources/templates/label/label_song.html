@@ -46,9 +46,6 @@
         <div class="col-md-5">
             <h3>标签<span class="label label-info" th:text="${label.labelName}">Info</span>下的单曲</h3>
         </div>
-        <div class="col-md-7" style="text-align: right;">
-            <button type="button" class="btn btn-primary" style="margin-top: 15px;" data-toggle="modal" data-target="#moveSongs">转移该标签下的单曲</button>
-        </div>
     </div>
     <div class="row login_middle">
         <table class="table table-hover">
@@ -63,7 +60,7 @@
             </thead>
             <tbody>
             <tr th:each="song : ${page.list}">
-                <td th:text="${song.songId}"></td>
+                <td th:text="${song.id}"></td>
                 <td class="songName" th:text="${song.songName}"></td>
                 <td th:value="${song.id}" class="songLabel"></td>
                 <td th:text="${song.artistName}">王菲</td>
@@ -93,29 +90,7 @@
         </nav>
     </div>
 
-    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="moveSongs">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">把标签<span th:text="${label.labelName}" class="label label-info label-show"></span>下的单曲转移到：</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="row" th:each="map : ${dimensionMap}">
-                        <div class="row btn-group" style="margin-left: 20px;margin-top: 10px;" >
-                            <button type="button" class="btn btn-warning btn-lg " th:text="${map.key.labelName}"></button>
-                        </div>
-                        <div class="row" style="margin-left: 20px; margin-top: 5px;" >
-                            <div class="btn-group" th:each="la : ${map.value}">
-                                <a th:if="${la.id != label.id}" th:href="@{'/song/label/update/' + ${label.id} + '/' + ${la.id}}" type="button" class="btn btn-info song_label" th:text="${la.labelName}"></a>
-                                <a th:if="${la.id == label.id}" type="button" class="btn btn-info song_label" th:text="${la.labelName}"></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
 <script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
 <script th:src="@{/js/bootstrap.min.js}" src="/js/bootstrap.min.js" ></script>

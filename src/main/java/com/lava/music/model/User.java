@@ -19,8 +19,44 @@ public class User {
     private Integer taskNumber;
     private Integer submitNumber;
     private Integer auditNumber;
+    private String email;
+    private String trueName;
+    private Long fatherId;
+    private String tmpPwd;
+
+    public String getTmpPwd() {
+        return tmpPwd;
+    }
+
+    public void setTmpPwd(String tmpPwd) {
+        this.tmpPwd = tmpPwd;
+    }
+
     private List<TagAuth> tagAuthList;
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getTrueName() {
+        return trueName;
+    }
+
+    public void setTrueName(String trueName) {
+        this.trueName = trueName;
+    }
+
+    public Long getFatherId() {
+        return fatherId;
+    }
+
+    public void setFatherId(Long fatherId) {
+        this.fatherId = fatherId;
+    }
 
     public Integer getTaskNumber() {
         return taskNumber;

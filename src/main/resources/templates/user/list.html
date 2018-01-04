@@ -42,6 +42,8 @@
             <thead>
             <tr>
                 <th>用户名称</th>
+                <th>邮箱</th>
+                <th>真实姓名</th>
                 <th>上次登录时间</th>
                 <th>用户类型</th>
                 <th>用户标签权限</th>
@@ -51,6 +53,8 @@
             <tbody>
             <tr th:each="user : ${page.list}">
                 <td th:text="${user.userName}"></td>
+                <td th:text="${user.email}"></td>
+                <td th:text="${user.trueName}"></td>
                 <td th:text="${user.lastLoginTime}"></td>
                 <td th:text="${user.userTypeName}"></td>
                 <td>

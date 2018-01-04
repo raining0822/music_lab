@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,19 +33,27 @@ public class UserDaoImpl extends BaseDao implements UserDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+
+
+
     @Override
     public Long insert(final User user, String[] ids) {
-        final String sql = "insert into user(userName, userPwd, createTime, userType, effect) values(?,?,?,?,?)";
+        final String sql = "insert into user(email, trueName, tmpPwd, createTime, userType, effect, taskNumber, submitNumber, auditNumber, fatherId) values(?,?,?,?,?,?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                 PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                preparedStatement.setString(1, user.getUserName());
-                preparedStatement.setString(2, user.getUserPwd());
-                preparedStatement.setObject(3, user.getCreateTime());
-                preparedStatement.setInt(4, user.getUserType());
-                preparedStatement.setInt(5, user.getEffect());
+                preparedStatement.setString(1, user.getEmail());
+                preparedStatement.setString(2, user.getTrueName());
+                preparedStatement.setString(3, user.getTmpPwd());
+                preparedStatement.setObject(4, user.getCreateTime());
+                preparedStatement.setInt(5, user.getUserType());
+                preparedStatement.setInt(6, user.getEffect());
+                preparedStatement.setInt(7, user.getTaskNumber());
+                preparedStatement.setInt(8, user.getSubmitNumber());
+                preparedStatement.setInt(9, user.getAuditNumber());
+                preparedStatement.setObject(10, user.getFatherId());
                 return preparedStatement;
             }
         }, keyHolder);
@@ -90,7 +99,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public Page<User> selectByPage(Page<User> page) {
-        String sql = "select * from user order by createTime desc limit ?, ?";
+        String sql = "select * from user order by createTime desc limit ?, ?;";
         RowMapper<User> userRowMapper = new BeanPropertyRowMapper<User>(User.class);
         List<User> userList = jdbcTemplate.query(sql, userRowMapper, (page.getPageNo() - 1) * page.getPageSize(), page.getPageSize());
         for(User user : userList){
@@ -101,7 +110,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
                 }else if(userType == 0){
                     user.setUserTypeName("超级管理员");
                 }else if(userType == 2){
-                    user.setUserTypeName("专业的耳朵");
+                    user.setUserTypeName("音乐分析师");
                 }
                 user.setTagAuthList(selectUserTagAuth(String.valueOf(user.getId())));
             }
@@ -123,10 +132,21 @@ public class UserDaoImpl extends BaseDao implements UserDao {
     }
 
     @Override
-    public User selectByUserNameAndUserPwd(String userName, String userPwd) {
-        String sql = "select * from user where userName = ? and userPwd = ?;";
+    public User selectByEmailAndUserPwd(String email, String userPwd) {
+        String sql = "select * from user where email = ? and userPwd = ?;";
         RowMapper<User> userRowMapper = new BeanPropertyRowMapper<User>(User.class);
-        List<User> userList = jdbcTemplate.query(sql, userRowMapper, userName, userPwd);
+        List<User> userList = jdbcTemplate.query(sql, userRowMapper, email, userPwd);
+        if(userList != null && userList.size() > 0){
+            return userList.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public User selectByEmailAndUserTmpPwd(String email, String userTmpPwd) {
+        String sql = "select * from user where email = ? and tmpPwd = ?;";
+        RowMapper<User> userRowMapper = new BeanPropertyRowMapper<User>(User.class);
+        List<User> userList = jdbcTemplate.query(sql, userRowMapper, email, userTmpPwd);
         if(userList != null && userList.size() > 0){
             return userList.get(0);
         }
@@ -213,6 +233,26 @@ public class UserDaoImpl extends BaseDao implements UserDao {
         String sql = "update user set submitNumber = ? where id = ?;";
         jdbcTemplate.update(sql, user.getSubmitNumber(), user.getId());
     }
+
+    @Override
+    public User findByUserTrueNameOrEmail(String trueName, String email) {
+        String sql = "select * from user where 1 = 1 ";
+        RowMapper<User> rowMapper = new BeanPropertyRowMapper<User>(User.class);
+        List<User> users = null;
+        if(StringUtils.hasText(trueName)){
+            sql += " AND trueName = ? ;";
+            users = jdbcTemplate.query(sql, rowMapper, trueName);
+        }
+        else if(StringUtils.hasText(email)){
+            sql += " AND email = ?;";
+            users = jdbcTemplate.query(sql, rowMapper, email);
+        }
+        if(users != null && users.size() > 0){
+            return users.get(0);
+        }
+        return null;
+    }
+
 
     @Override
     public void updateUserAuditNumber(User user) {

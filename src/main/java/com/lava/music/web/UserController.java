@@ -7,9 +7,11 @@ import com.lava.music.service.UserRecordService;
 import com.lava.music.service.UserService;
 import com.lava.music.util.CommonUtil;
 import com.lava.music.util.Page;
+import org.codehaus.groovy.runtime.metaclass.ConcurrentReaderHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,9 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.websocket.Session;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by mac on 2017/8/17.
@@ -52,17 +52,36 @@ public class UserController {
 
     /**
      * 用户登录
-     * @param userName
+     * @param email
      * @param userPwd
      * @param request
      * @param modelMap
      * @return
      */
     @RequestMapping("/login")
-    public String login(@RequestParam String userName, @RequestParam String userPwd, HttpServletRequest request, ModelMap modelMap){
-        User user = userService.login(userName, userPwd);
+    public String login(@RequestParam String email, @RequestParam String userPwd, HttpServletRequest request, ModelMap modelMap){
+        User user = userService.findByUserTrueNameOrEmail(null, email);
         if(user == null){
-            modelMap.addAttribute("msg", "用户名或密码错误！");
+            modelMap.addAttribute("msg", "没有这个用户！");
+            return "forward:/user/go";
+        }
+        String uPwd = user.getUserPwd();
+        if(!StringUtils.hasText(uPwd)){
+            user = userService.tmpLogin(email, userPwd);
+            if(user != null){
+                HttpSession session = request.getSession();
+                session.setAttribute("loginUser", user);
+                userService.updateLoginTime(user.getId());
+                return "user/tmp_pwd";
+            }else{
+                modelMap.addAttribute("msg", "邮箱或密码错误！");
+                return "forward:/user/go";
+            }
+        }else{
+            user = userService.login(email, userPwd);
+        }
+        if(user == null){
+            modelMap.addAttribute("msg", "邮箱或密码错误！");
             return "forward:/user/go";
         }
         if(user != null && user.getEffect() == 0) {
@@ -170,21 +189,20 @@ public class UserController {
 
     /**
      * 添加用户
-     * @param userName
      * @param userType
      * @param modelMap
      * @param request
      * @return
      */
     @RequestMapping("/add")
-    public String createUser(@RequestParam String userName, @RequestParam Integer userType, @RequestParam String userAuthority, ModelMap modelMap, HttpServletRequest request){
-        User user = userService.findByUserName(userName);
+    public String createUser(@RequestParam String trueName, @RequestParam(required = false) Long fatherId, @RequestParam String email, @RequestParam Integer userType, @RequestParam String userAuthority, ModelMap modelMap, HttpServletRequest request){
+        User user = userService.findByUserTrueNameOrEmail(trueName, null);
+        if(user == null) user = userService.findByUserTrueNameOrEmail(null, email);
         if(user != null){
-            modelMap.addAttribute("msg","用户名不能重复！");
+            modelMap.addAttribute("msg","用户名或邮箱已被占用！");
             return "forward:/user/toadd";
         }
-
-        userService.addUser(userName, userType, userAuthority);
+        User newUser = userService.addUser(email, trueName, fatherId, userType, userAuthority);
         //添加日志
         HttpSession session = request.getSession();
         User loginUser = (User) session.getAttribute("loginUser");
@@ -192,9 +210,12 @@ public class UserController {
         userRecord.setAction(UserRecord.ADD_USER);
         userRecord.setCreateTime(new Date());
         userRecord.setUserId(loginUser.getId());
-        userRecord.setSourceData(userName);
+        userRecord.setSourceData(trueName);
         userRecordService.addRecord(userRecord);
-        return "redirect:/user/list/1";
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("msg", "用户创建成功，邮箱 ：【" + newUser.getEmail() + "】 临时密码： 【" + newUser.getTmpPwd() + "】 用户第一次登陆需要修改密码！");
+        modelMap.addAttribute("data",data);
+        return "user/add_info";
     }
 
     @RequestMapping("/edit")
@@ -203,6 +224,24 @@ public class UserController {
         user.setUserType(userType);
         userService.updateUser(user, userAuthority);
         return "redirect:/user/list/1";
+    }
+
+    @RequestMapping("/father/msg")
+    @ResponseBody
+    public Map<String, Object> findFatherMsg(@RequestParam String searchFatherMsg){
+        Map<String, Object> data = new HashMap<String, Object>();
+        if(StringUtils.hasText(searchFatherMsg)){
+            User user =  userService.findByUserTrueNameOrEmail(searchFatherMsg, null);
+            if(user == null) user = userService.findByUserTrueNameOrEmail(null, searchFatherMsg);
+            if(user != null){
+                data.put("msg", (StringUtils.hasText(user.getTrueName()) ? user.getTrueName() : "")  + " | " + (StringUtils.hasText(user.getEmail()) ? user.getEmail() : ""));
+                data.put("value", user.getId());
+            }
+            else{
+                data.put("msg", "没有这个用户");
+            }
+        }
+        return data;
     }
 
     /**
@@ -249,6 +288,35 @@ public class UserController {
     }
 
     /**
+     * 修改密码
+     * @param newPwd
+     * @param modelMap
+     * @param request
+     * @return
+     */
+    @RequestMapping("/change/tmp_pwd")
+    public String changeTmpPwd(@RequestParam String newPwd, @RequestParam String newPwd2, ModelMap modelMap, HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("loginUser");
+        if(user != null){
+            if(!newPwd.equals(newPwd2)){
+                modelMap.addAttribute("msg","两次密码不一致！");
+                return "forward:/user/pwd";
+            }
+            else{
+                userService.updatePwd(user.getId(), CommonUtil.MD5(newPwd));
+                //添加日志
+                UserRecord userRecord = new UserRecord();
+                userRecord.setAction(UserRecord.CHANGE_PWD);
+                userRecord.setCreateTime(new Date());
+                userRecord.setUserId(user.getId());
+                userRecordService.addRecord(userRecord);
+            }
+        }
+        return "redirect:/user/go";
+    }
+
+    /**
      * 获取某个用户的信息
      * @param userId
      * @param modelMap
@@ -262,17 +330,31 @@ public class UserController {
     }
 
     /**
-     * 获取某个用户的信息
+     * 获取编辑用户的信息
      * @param modelMap
      * @return
      */
-    @RequestMapping("/message")
-    public String userMessage(ModelMap modelMap, HttpServletRequest request){
+    @RequestMapping("/message/label")
+    public String userMessageLabel(ModelMap modelMap, HttpServletRequest request){
         HttpSession session = request.getSession();
         User loginUser = (User) session.getAttribute("loginUser");
         User user = userService.findById(String.valueOf(loginUser.getId()));
         modelMap.addAttribute("user", user);
         return "user/info";
+    }
+
+    /**
+     * 获取管理员用户的信息
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping("/message/audit")
+    public String userMessageAudit(ModelMap modelMap, HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User loginUser = (User) session.getAttribute("loginUser");
+        //User user = userService.findUserAuditMsg(loginUser);
+        //modelMap.addAttribute("user", user);
+        return "user/audit_info";
     }
 
     @RequestMapping("/to_edit/{userId}")

@@ -23,6 +23,7 @@ public interface UserService {
 
     void addUser(String userName, Integer userType, String userAuthority);
 
+    User tmpLogin(String userName, String userPwd);
     User login(String userName, String userPwd);
 
     User findByUserName(String userName);
@@ -47,4 +48,7 @@ public interface UserService {
 
     Integer submit(Long userId, Long songId);
 
+    User findByUserTrueNameOrEmail(String trueName, String email);
+
+    User addUser(String email, String trueName, Long fatherId, Integer userType, String userAuthority);
 }
