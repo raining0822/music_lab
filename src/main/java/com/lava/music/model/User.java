@@ -19,6 +19,25 @@ public class User {
     private Integer taskNumber;
     private Integer submitNumber;
     private Integer auditNumber;
+    private Integer auditTaskNumber;
+    private Integer doneTaskNumber;
+
+    public Integer getAuditTaskNumber() {
+        return auditTaskNumber;
+    }
+
+    public void setAuditTaskNumber(Integer auditTaskNumber) {
+        this.auditTaskNumber = auditTaskNumber;
+    }
+
+    public Integer getDoneTaskNumber() {
+        return doneTaskNumber;
+    }
+
+    public void setDoneTaskNumber(Integer doneTaskNumber) {
+        this.doneTaskNumber = doneTaskNumber;
+    }
+
     private String email;
     private String trueName;
     private Long fatherId;

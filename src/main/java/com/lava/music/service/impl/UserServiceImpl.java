@@ -81,6 +81,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setSubmitNumber(0);
         user.setTaskNumber(0);
         user.setAuditNumber(0);
+        user.setAuditTaskNumber(0);
+        user.setDoneTaskNumber(0);
         user.setCreateTime(new Date());
         user.setEffect(1);
         user.setEmail(email);

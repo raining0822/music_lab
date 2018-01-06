@@ -22,8 +22,8 @@
     <div class="row login_head"></div>
     <div class="row login_middle">
         <h3><span class="label label-primary" th:text="${'姓名：' + user.userName}">Primary</span></h3>
-        <h3><span class="label label-success" th:text="${'总计接到审核任务：' + user.taskNumber + '个'}">Primary</span></h3>
-        <h3><span class="label label-danger" th:text="${'总计审核任务：' + user.submitNumber + '个'}">Primary</span></h3>
+        <h3><span class="label label-success" th:text="${'总计接到审核任务：' + user.auditTaskNumber + '个'}">Primary</span></h3>
+        <h3><span class="label label-danger" th:text="${'总计审核任务：' + user.doneTaskNumber + '个'}">Primary</span></h3>
     </div>
     <div class="row"></div>
 </div>

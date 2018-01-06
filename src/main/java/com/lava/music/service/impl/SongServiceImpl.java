@@ -6,6 +6,7 @@ import com.lava.music.service.BaseService;
 import com.lava.music.service.SongService;
 import com.lava.music.util.LabelUtil;
 import com.lava.music.util.Page;
+import javassist.bytecode.LineNumberAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -249,7 +250,13 @@ public class SongServiceImpl extends BaseService implements SongService {
         userRecord.setUserId(userId);
         userRecord.setSourceData(songId + "|" + labelIds);
         userRecordDao.insert(userRecord);
-
+        //更新用户的审核任务数量
+        User user1 = userDao.selectById(userId);
+        if(user1.getDoneTaskNumber() == null){
+            user1.setDoneTaskNumber(0);
+        }
+        user1.setDoneTaskNumber(user1.getDoneTaskNumber() + 1);
+        userDao.updateUserDoneTaskNumber(user1);
     }
 
     @Override
@@ -313,7 +320,7 @@ public class SongServiceImpl extends BaseService implements SongService {
             return;
         }
         //获取可以领取任务的用户
-        List<User> users = userDao.selectUserByType(0,1,2);
+        List<User> users = userDao.selectUserByType(2);
         if(users != null && users.size() > 0){
             for(User user : users){
                 List<Song> taskList = new ArrayList<Song>();
@@ -376,6 +383,15 @@ public class SongServiceImpl extends BaseService implements SongService {
         }
     }
 
+    private User check(List<User> list, User user){
+        for(User u : list){
+            if(u.getId() == user.getId()){
+                return u;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void allotAuditTask() {
         //获取待审核的单曲
@@ -384,7 +400,47 @@ public class SongServiceImpl extends BaseService implements SongService {
             return;
         }
         //获取所有的管理员
-        List<User> users = userDao.selectUserByType(0,1);
+        List<User> users = userDao.selectUserByType(1);
+        //处理主子账户的任务推送
+        //找到符合有主账户条件的任务集合
+        List<Song> fatherSong = new ArrayList<Song>();
+        //记录操作的主账户信息
+        List<User> fathers = new ArrayList<User>();
+        Iterator<Song> songIterator = songList.iterator();
+        while(songIterator.hasNext()){
+            Song song = songIterator.next();
+            Long userId = song.getTaskUserId();
+            User user = userDao.selectById(userId);
+            //如果一个任务的提交者，有主账户，将此任务推送给主账户
+            Long fatherId = user.getFatherId();
+            if(fatherId != null){
+                User father = userDao.selectById(fatherId);
+                song.setAuditUserId(fatherId);
+                song.setSongStatus(Song.SUBMITPULLED);
+                fatherSong.add(song);
+                //将任务从集合中移除
+                songIterator.remove();
+                //将主账户从管理员中移除
+                users.remove(father);
+                User user1 = check(fathers, father);
+                if(user1 != null){
+                    if(user1.getAuditTaskNumber() == null){
+                        user1.setAuditTaskNumber(0);
+                    }
+                    user1.setAuditTaskNumber(user1.getAuditTaskNumber() + 1);
+                }else{
+                    if(father.getAuditTaskNumber() == null){
+                        father.setAuditTaskNumber(0);
+                    }
+                    fathers.add(father);
+                }
+            }
+        }
+        //批量刷新任务
+        songDao.updateSongsOfAudit(fatherSong);
+        //批量更新主账户信息
+        userDao.updateUserAuditTaskNumber(fathers);
+        //处理其它任务
         if(users != null && users.size() > 0){
             for(User user : users){
                 List<TagAuth> tagAuthList  = userDao.selectUserTagAuth(String.valueOf(user.getId()));
@@ -438,6 +494,14 @@ public class SongServiceImpl extends BaseService implements SongService {
                     }
                     //批量刷新任务
                     songDao.updateSongsOfAudit(taskList);
+                    //更新审核任务领取数量
+                    List<User> users1 = new ArrayList<User>();
+                    if(user.getAuditTaskNumber() == null){
+                        user.setAuditTaskNumber(0);
+                    }
+                    user.setAuditTaskNumber(user.getAuditTaskNumber() + taskList.size());
+                    users1.add(user);
+                    userDao.updateUserAuditTaskNumber(users1);
                 }
             }
         }

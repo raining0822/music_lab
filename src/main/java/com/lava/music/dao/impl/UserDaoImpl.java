@@ -38,7 +38,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public Long insert(final User user, String[] ids) {
-        final String sql = "insert into user(email, trueName, tmpPwd, createTime, userType, effect, taskNumber, submitNumber, auditNumber, fatherId) values(?,?,?,?,?,?,?,?,?,?)";
+        final String sql = "insert into user(email, trueName, tmpPwd, createTime, userType, effect, taskNumber, submitNumber, auditNumber, fatherId) values(?,?,?,?,?,?,?,?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
@@ -53,7 +53,9 @@ public class UserDaoImpl extends BaseDao implements UserDao {
                 preparedStatement.setInt(7, user.getTaskNumber());
                 preparedStatement.setInt(8, user.getSubmitNumber());
                 preparedStatement.setInt(9, user.getAuditNumber());
-                preparedStatement.setObject(10, user.getFatherId());
+                preparedStatement.setInt(10, user.getAuditTaskNumber());
+                preparedStatement.setInt(11, user.getDoneTaskNumber());
+                preparedStatement.setObject(12, user.getFatherId());
                 return preparedStatement;
             }
         }, keyHolder);
@@ -154,6 +156,22 @@ public class UserDaoImpl extends BaseDao implements UserDao {
     }
 
     @Override
+    public void updateUserAuditTaskNumber(List<User> fathers) {
+        String sql = "update user set auditTaskNumber = ? where id = ?;";
+        List<Object[]> params = new ArrayList<Object[]>();
+        for(User u : fathers){
+            params.add(new Object[]{u.getAuditTaskNumber(), u.getId()});
+        }
+        jdbcTemplate.batchUpdate(sql,params);
+    }
+
+    @Override
+    public void updateUserDoneTaskNumber(User user1) {
+        String sql = "update user set doneTaskNumber = ? where id = ?;";
+        jdbcTemplate.update(sql, user1.getDoneTaskNumber(), user1.getId());
+    }
+
+    @Override
     public User selectByUserName(String userName) {
         String sql = "select * from user where userName = ?;";
         RowMapper<User> userRowMapper = new BeanPropertyRowMapper<User>(User.class);
@@ -178,8 +196,8 @@ public class UserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public Integer updateUser(User user, String[] ids) {
-        String sql = "update user set userType = ? where id = ?;";
-        jdbcTemplate.update(sql, user.getUserType(), user.getId());
+        String sql = "update user set userType = ?, trueName = ?, email = ?, fatherId = ? where id = ?;";
+        jdbcTemplate.update(sql, user.getUserType(), user.getTrueName(), user.getEmail(), user.getFatherId(), user.getId());
         String sql2 = "delete from r_tag_authority_user where user_id = ?;";
         jdbcTemplate.update(sql2, user.getId());
         String sql3 = "insert into r_tag_authority_user(tag_auth_id, user_id, effect) values(?,?,?);";

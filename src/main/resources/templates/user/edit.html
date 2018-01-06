@@ -24,24 +24,40 @@
         <div class="alert alert-danger" role="alert" th:if="${msg != null}" th:text="${msg}">...</div>
         <form class="form-inline" action="/user/edit" method="post">
             <div class="form-group">
-                <label for="userName">用户名</label>
-                <input th:value="${user.userName}" type="text" readonly="readonly" class="form-control" id="userName" name="userName" placeholder="请填写用户名"/>
+                <label for="email">用户邮箱</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="用户邮箱" th:value="${user.email}"/>
             </div>
             <div class="form-group">
-                <label for="userType">请选择用户类型</label>
+                <label for="trueName">真实姓名</label>
+                <input type="text" class="form-control" id="trueName" name="trueName" placeholder="真实姓名" th:value="${user.trueName}"/>
+            </div>
+            <hr/>
+            <div class="form-group">
+                <label for="userType">用户类型</label>
                 <select name="userType" id="userType" class="form-control">
-                    <option value="2" th:selected="${user.userType == 2}">音乐分析师</option>
-                    <option value="1" th:selected="${user.userType == 1}">管理员</option>
-                    <option value="0" th:selected="${user.userType == 0}">超级管理员</option>
+                    <option value="2"  th:selected="${user.userType == 2}">音乐分析师</option>
+                    <option value="1"  th:selected="${user.userType == 1}">管理员</option>
+                    <option value="0"  th:selected="${user.userType == 0}">超级管理员</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="userType">请选择用户标签权限</label>
-                    <input th:checked="${#lists.contains(tagAuthIds, 1)}" type="checkbox" name="userAuthority" value="1"/>基础
-                    <input th:checked="${#lists.contains(tagAuthIds, 2)}" type="checkbox" name="userAuthority" value="2"/>理性
-                    <input th:checked="${#lists.contains(tagAuthIds, 3)}" type="checkbox" name="userAuthority" value="3"/>感性
+                <label for="userType">用户标签权限</label>
+                <input th:checked="${#lists.contains(tagAuthIds, 1)}" type="checkbox" name="userAuthority" value="1"/> 基础
+                <input th:checked="${#lists.contains(tagAuthIds, 2)}" type="checkbox" name="userAuthority" value="2"/> 理性
+                <input th:checked="${#lists.contains(tagAuthIds, 3)}" type="checkbox" name="userAuthority" value="3"/> 感性
             </div>
-            <button type="button" class="btn btn-primary" id="formSub">提  交</button>
+            <hr/>
+            <div class="form-group">
+                <label for="searchFatherMsg">主账户信息</label>
+                <input type="text" class="form-control" id="searchFatherMsg" name="searchFatherMsg" placeholder="邮箱或真实姓名" th:value="${fatherMsg}"/>
+                <button type="button" class="btn btn-default" id="searchFatherMsgBtn">查询</button>
+                <label id="fatherMsg"></label>
+            </div>
+            <hr/>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">提  交</button>
+            </div>
+            <input type="hidden" name="fatherId" id="fatherId"/>
             <input type="hidden" th:value="${user.id}" name="userId"/>
         </form>
     </div>
@@ -61,6 +77,23 @@
                 }else{
                     $("form").submit();
                 }
+            });
+
+            $("#searchFatherMsgBtn").on("click", function(){
+                var searchFatherMsg = $("#searchFatherMsg").val();
+                if(searchFatherMsg == null || searchFatherMsg == ''){
+                    alert("请填写查询信息");
+                    return;
+                }
+                $.ajax({
+                    url:"/user/father/msg",
+                    method:"POST",
+                    data:"searchFatherMsg=" + searchFatherMsg,
+                    success:function(data){
+                        $("#fatherMsg").html(data.msg);
+                        $("#fatherId").val(data.value);
+                    }
+                });
             });
         });
     })(jQuery);

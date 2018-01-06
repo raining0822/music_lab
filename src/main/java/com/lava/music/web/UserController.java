@@ -219,9 +219,12 @@ public class UserController {
     }
 
     @RequestMapping("/edit")
-    public String userEdit(@RequestParam String userName,@RequestParam String userId, @RequestParam Integer userType, @RequestParam String userAuthority,ModelMap modelMap ){
+    public String userEdit(@RequestParam String trueName,@RequestParam(required = false) Long fatherId, @RequestParam String userId, @RequestParam String email,@RequestParam Integer userType, @RequestParam String userAuthority,ModelMap modelMap ){
         User user = userService.findById(userId);
         user.setUserType(userType);
+        user.setTrueName(trueName);
+        user.setFatherId(fatherId);
+        user.setEmail(email);
         userService.updateUser(user, userAuthority);
         return "redirect:/user/list/1";
     }
@@ -364,6 +367,10 @@ public class UserController {
         List<Integer> ids = new ArrayList<Integer>();
         for(TagAuth tagAuth : authList){
             ids.add(tagAuth.getId());
+        }
+        if(user.getFatherId() != null){
+            User father = userService.findById(String.valueOf(user.getFatherId()));
+            modelMap.addAttribute("fatherMsg", father.getEmail());
         }
         modelMap.addAttribute("user", user);
         modelMap.addAttribute("tagAuthIds", ids);

@@ -46,4 +46,7 @@ public interface UserDao {
     User findByUserTrueNameOrEmail(String trueName, String email);
     User selectByEmailAndUserTmpPwd(String email, String userTmpPwd);
 
+    void updateUserAuditTaskNumber(List<User> fathers);
+
+    void updateUserDoneTaskNumber(User user1);
 }
