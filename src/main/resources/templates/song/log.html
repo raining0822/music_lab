@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>单曲信息</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="/css/bootstrap.min.css"/>
+    <style>
+        body{
+            background-color: #eeeeee;
+        }
+        .login_head{
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row login_head"></div>
+    <div class="row login_middle">
+        <p class="bg-info" style="padding:  15px;" th:each="log : ${songRecordList}">
+            <span>单曲【</span>
+            <span th:text="${log.songName}"></span>
+            <span th:text="'songId : ' + ${log.songId}"></span>
+            <span>】由</span>
+            <span th:if="${log.userType == 0 and userId != -1}">超级管理员</span>
+            <span th:if="${log.userType == 1 and userId != -1}">管理员</span>
+            <span th:if="${log.userType == 2 and userId != -1}">音乐编辑</span>
+            <span th:if="${log.userId != -1}" th:text="${log.email}"></span>
+            <span th:if="${log.userId == -1}">系统</span>
+            <span >在</span>
+            <span th:text="${log.createTime}"></span>
+            <span th:if="${log.action == 1}">推送到任务池</span>
+            <span th:if="${log.action == 2}">分配给</span>
+            <span th:if="${log.action == 3}">提交审核</span>
+            <span th:if="${log.action == 3}" th:text="${log.metaData}"></span>
+            <span th:if="${log.action == 4}">审核</span>
+            <span th:if="${log.action == 4}" th:text="${log.metaData}"></span>
+            <span th:if="${log.action == 5}">分配审核</span>
+            <span th:if="${log.action == 1}"></span>
+            <span th:if="${log.dataEmail != null}" th:text="${log.dataEmail}"></span>
+        </p>
+    </div>
+    <div class="row">
+        <a th:href="@{'/song/list/' + ${searchType} + '/' + ${keyword} + '/' + ${pageNo}}" class="btn btn-primary">返回列表</a>
+    </div>
+</div>
+
+<script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
+<script th:src="@{/js/bootstrap.min.js}" src="/js/bootstrap.min.js" ></script>
+
+</body>
+</html>

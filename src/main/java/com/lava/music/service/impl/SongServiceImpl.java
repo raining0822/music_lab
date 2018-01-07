@@ -190,6 +190,7 @@ public class SongServiceImpl extends BaseService implements SongService {
         User user = userDao.selectById(auditSong.getTaskUserId());
         //获取单曲下的标签
         List<Label> songLabels = labelDao.selectLabelBySongId(songId);
+        List<Label> songNewLabels = null;
         //如果标签与原有一直，则不做任何操作
         Boolean checkResult = LabelUtil.checkTag(songLabels, labelIds.split(","));
         if(checkResult){
@@ -201,7 +202,7 @@ public class SongServiceImpl extends BaseService implements SongService {
             songDao.addLabels(Long.valueOf(songId), labelIds);
             //刷新单曲的标签权限标识
             songDao.updateSongTagFlag(Long.valueOf(songId));
-            List<Label> songNewLabels = labelDao.selectLabelBySongId(songId);
+            songNewLabels = labelDao.selectLabelBySongId(songId);
             boolean basicFlag = false;
             boolean reasonFlag = false;
             boolean sensFlag = false;
@@ -240,7 +241,16 @@ public class SongServiceImpl extends BaseService implements SongService {
         songRecord.setCreateTime(new Date());
         songRecord.setSongId(Long.valueOf(songId));
         songRecord.setUserId(userId);
-        songRecord.setMetaData(auditSong.getAuditResult() + "|" + auditSong.getTaskUserId());
+        //songRecord.setMetaData(auditSong.getAuditResult() + "|" + auditSong.getTaskUserId());
+        StringBuffer stringBuffer = new StringBuffer();
+        for(Label label : songNewLabels){
+            stringBuffer.append(label.getId()).append(",");
+        }
+        stringBuffer.append("|");
+        for(Label label : songNewLabels){
+            stringBuffer.append(label.getLabelName()).append(",");
+        }
+        songRecord.setMetaData(stringBuffer.toString());
         songRecordDao.insert(songRecord);
 
         //添加日志
@@ -319,6 +329,7 @@ public class SongServiceImpl extends BaseService implements SongService {
         if(songList == null || songList.size() < 1){
             return;
         }
+        List<SongRecord> songRecordList = new ArrayList<SongRecord>();
         //获取可以领取任务的用户
         List<User> users = userDao.selectUserByType(2);
         if(users != null && users.size() > 0){
@@ -330,44 +341,67 @@ public class SongServiceImpl extends BaseService implements SongService {
                     Iterator<Song> iterator = songList.iterator();
                     while (iterator.hasNext()){
                         Song song = iterator.next();
+                        SongRecord songRecord = new SongRecord();
                         Integer basicTag = song.getBasicTag();
                         Integer reasonTag = song.getReasonTag();
                         Integer sensibilityTag = song.getSensibilityTag();
-                        if(basicTag == null || basicTag == 0){
+                        Boolean flag = false;
+                        if((basicTag == null || basicTag == 0) && !flag){
                             for(TagAuth tagAuth : tagAuthList){
                                 if(tagAuth.getName().trim().equals("基础")){
                                     song.setTaskUserId(user.getId());
                                     song.setSongStatus(Song.PULLED);
                                     song.setTaskTime(new Date());
                                     taskList.add(song);
+                                    songRecord.setAction(SongRecord.TASK_SONG);
+                                    songRecord.setUserId(-1L);
+                                    songRecord.setMetaData(String.valueOf(user.getId()));
+                                    songRecord.setSongId(song.getId());
+                                    songRecord.setCreateTime(new Date());
+                                    songRecordList.add(songRecord);
                                     iterator.remove();
                                     songCount ++;
+                                    flag = true;
                                     break;
                                 }
                             }
                         }
-                        else if(reasonTag == null || reasonTag == 0){
+                        if((reasonTag == null || reasonTag == 0) && !flag){
                             for(TagAuth tagAuth : tagAuthList){
                                 if(tagAuth.getName().trim().equals("理性")){
                                     song.setTaskUserId(user.getId());
                                     song.setSongStatus(Song.PULLED);
                                     song.setTaskTime(new Date());
                                     taskList.add(song);
+                                    songRecord.setAction(SongRecord.TASK_SONG);
+                                    songRecord.setUserId(-1L);
+                                    songRecord.setMetaData(String.valueOf(user.getId()));
+                                    songRecord.setSongId(song.getId());
+                                    songRecord.setCreateTime(new Date());
+                                    songRecordList.add(songRecord);
                                     iterator.remove();
                                     songCount ++;
+                                    flag = true;
                                     break;
                                 }
                             }
                         }
-                        else if(sensibilityTag == null || sensibilityTag == 0){
+                        if((sensibilityTag == null || sensibilityTag == 0) && !flag){
                             for(TagAuth tagAuth : tagAuthList){
                                 if(tagAuth.getName().trim().equals("感性")){
                                     song.setTaskUserId(user.getId());
                                     song.setSongStatus(Song.PULLED);
                                     song.setTaskTime(new Date());
                                     taskList.add(song);
+                                    songRecord.setAction(SongRecord.TASK_SONG);
+                                    songRecord.setUserId(-1L);
+                                    songRecord.setMetaData(String.valueOf(user.getId()));
+                                    songRecord.setSongId(song.getId());
+                                    songRecord.setCreateTime(new Date());
+                                    songRecordList.add(songRecord);
                                     iterator.remove();
                                     songCount ++;
+                                    flag = true;
                                     break;
                                 }
                             }
@@ -381,6 +415,8 @@ public class SongServiceImpl extends BaseService implements SongService {
                 }
             }
         }
+        //批量添加日志
+        songRecordDao.insert(songRecordList);
     }
 
     private User check(List<User> list, User user){
@@ -399,6 +435,7 @@ public class SongServiceImpl extends BaseService implements SongService {
         if(songList == null || songList.size() < 1){
             return;
         }
+        List<SongRecord> songRecordList = new ArrayList<SongRecord>();
         //获取所有的管理员
         List<User> users = userDao.selectUserByType(1);
         //处理主子账户的任务推送
@@ -409,6 +446,7 @@ public class SongServiceImpl extends BaseService implements SongService {
         Iterator<Song> songIterator = songList.iterator();
         while(songIterator.hasNext()){
             Song song = songIterator.next();
+            SongRecord songRecord = new SongRecord();
             Long userId = song.getTaskUserId();
             User user = userDao.selectById(userId);
             //如果一个任务的提交者，有主账户，将此任务推送给主账户
@@ -418,6 +456,12 @@ public class SongServiceImpl extends BaseService implements SongService {
                 song.setAuditUserId(fatherId);
                 song.setSongStatus(Song.SUBMITPULLED);
                 fatherSong.add(song);
+                songRecord.setAction(SongRecord.AUDIT_TASK_SONG);
+                songRecord.setCreateTime(new Date());
+                songRecord.setSongId(song.getId());
+                songRecord.setUserId(-1L);
+                songRecord.setMetaData(String.valueOf(father.getId()));
+                songRecordList.add(songRecord);
                 //将任务从集合中移除
                 songIterator.remove();
                 //将主账户从管理员中移除
@@ -440,6 +484,7 @@ public class SongServiceImpl extends BaseService implements SongService {
         songDao.updateSongsOfAudit(fatherSong);
         //批量更新主账户信息
         userDao.updateUserAuditTaskNumber(fathers);
+
         //处理其它任务
         if(users != null && users.size() > 0){
             for(User user : users){
@@ -451,41 +496,64 @@ public class SongServiceImpl extends BaseService implements SongService {
                     Iterator<Song> iterator = songList.iterator();
                     while(iterator.hasNext()){
                         Song song = iterator.next();
+                        SongRecord songRecord = new SongRecord();
                         Integer basicTag = song.getBasicTag();
                         Integer reasonTag = song.getReasonTag();
                         Integer sensibilityTag = song.getSensibilityTag();
-                        if(basicTag != null && basicTag == 1){
+                        Boolean flag = false;
+                        if((basicTag != null && basicTag == 1) && !flag){
                             for(TagAuth tagAuth : tagAuthList){
                                 if(tagAuth.getName().trim().equals("基础")){
                                     song.setAuditUserId(user.getId());
                                     song.setSongStatus(Song.SUBMITPULLED);
                                     taskList.add(song);
+                                    songRecord.setAction(SongRecord.AUDIT_TASK_SONG);
+                                    songRecord.setCreateTime(new Date());
+                                    songRecord.setSongId(song.getId());
+                                    songRecord.setUserId(-1L);
+                                    songRecord.setMetaData(String.valueOf(user.getId()));
+                                    songRecordList.add(songRecord);
                                     iterator.remove();
                                     songCount ++;
+                                    flag = true;
                                     break;
                                 }
                             }
                         }
-                        else if(reasonTag != null || reasonTag == 1){
+                        if((reasonTag != null || reasonTag == 1) && !flag){
                             for(TagAuth tagAuth : tagAuthList){
                                 if(tagAuth.getName().trim().equals("理性")){
                                     song.setAuditUserId(user.getId());
                                     song.setSongStatus(Song.SUBMITPULLED);
                                     taskList.add(song);
+                                    songRecord.setAction(SongRecord.AUDIT_TASK_SONG);
+                                    songRecord.setCreateTime(new Date());
+                                    songRecord.setSongId(song.getId());
+                                    songRecord.setUserId(-1L);
+                                    songRecord.setMetaData(String.valueOf(user.getId()));
+                                    songRecordList.add(songRecord);
                                     iterator.remove();
                                     songCount ++;
+                                    flag = true;
                                     break;
                                 }
                             }
                         }
-                        else if(sensibilityTag != null || sensibilityTag == 1){
+                        if((sensibilityTag != null || sensibilityTag == 1) && !flag){
                             for(TagAuth tagAuth : tagAuthList){
                                 if(tagAuth.getName().trim().equals("感性")){
                                     song.setAuditUserId(user.getId());
                                     song.setSongStatus(Song.SUBMITPULLED);
                                     taskList.add(song);
+                                    songRecord.setAction(SongRecord.AUDIT_TASK_SONG);
+                                    songRecord.setCreateTime(new Date());
+                                    songRecord.setSongId(song.getId());
+                                    songRecord.setUserId(-1L);
+                                    songRecord.setMetaData(String.valueOf(user.getId()));
+                                    songRecordList.add(songRecord);
                                     iterator.remove();
                                     songCount ++;
+                                    flag = true;
                                     break;
                                 }
                             }
@@ -505,6 +573,8 @@ public class SongServiceImpl extends BaseService implements SongService {
                 }
             }
         }
+        //批量添加日志
+        songRecordDao.insert(songRecordList);
     }
 
 

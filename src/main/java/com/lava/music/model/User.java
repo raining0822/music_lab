@@ -21,6 +21,15 @@ public class User {
     private Integer auditNumber;
     private Integer auditTaskNumber;
     private Integer doneTaskNumber;
+    private String fatherEmail;
+
+    public String getFatherEmail() {
+        return fatherEmail;
+    }
+
+    public void setFatherEmail(String fatherEmail) {
+        this.fatherEmail = fatherEmail;
+    }
 
     public Integer getAuditTaskNumber() {
         return auditTaskNumber;

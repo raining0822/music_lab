@@ -6,6 +6,7 @@ import com.lava.music.model.User;
 import com.lava.music.util.Page;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mac on 2017/8/23.
@@ -49,4 +50,6 @@ public interface UserDao {
     void updateUserAuditTaskNumber(List<User> fathers);
 
     void updateUserDoneTaskNumber(User user1);
+
+    Map<String,Object> selectSonMsg(Long id);
 }

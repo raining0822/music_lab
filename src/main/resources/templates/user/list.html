@@ -45,7 +45,9 @@
                 <th>真实姓名</th>
                 <th>上次登录时间</th>
                 <th>用户类型</th>
+                <th>主账户</th>
                 <th>用户标签权限</th>
+                <th>临时密码</th>
                 <th>操作</th>
             </tr>
             </thead>
@@ -55,11 +57,14 @@
                 <td th:text="${user.trueName}"></td>
                 <td th:text="${user.lastLoginTime}"></td>
                 <td th:text="${user.userTypeName}"></td>
+                <td th:text="${user.fatherEmail}"></td>
                 <td>
                     <span th:each="tagAuth : ${user.tagAuthList}" th:text="${tagAuth.name + ','}"></span>
                 </td>
+                <td th:text="${user.tmpPwd}"></td>
                 <td>
-                    <a href="/user/info" class="userInfo" th:href="@{'/user/info/' + ${user.id}}">查看详情</a> |
+                    <a th:if="${user.userType == 1}" href="/user/info" class="userInfo" th:href="@{'/user/info/' + ${user.id}}">查看详情</a> |
+                    <a th:if="${user.userType == 2}" href="/user/info" class="userInfo" th:href="@{'/user/info/' + ${user.id}}">查看详情</a> |
                     <a th:if="${user.effect == 1}" href="#" class="userEffect" th:value="${user.id}">禁用</a> <a th:if="${user.effect == 0}" href="#" class="userActive" th:value="${user.id}">启用</a> |
                     <a href="/user/edit" class="userInfo" th:href="@{'/user/to_edit/' + ${user.id}}">编辑</a>
                 </td>

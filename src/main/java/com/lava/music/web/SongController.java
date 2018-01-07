@@ -336,6 +336,16 @@ public class SongController {
         return song;
     }
 
+    @RequestMapping("/log/{songId}/{searchType}/{keyword}/{pageNo}")
+    public String log(@PathVariable Long songId, @PathVariable Integer searchType, @PathVariable String keyword, @PathVariable Integer pageNo, HttpServletRequest request, ModelMap modelMap){
+        List<Map<String, Object>> songRecordList = songRecordService.findLogBySongId(songId);
+        modelMap.addAttribute("songRecordList", songRecordList);
+        modelMap.addAttribute("searchType", searchType);
+        modelMap.addAttribute("keyword", keyword);
+        modelMap.addAttribute("pageNo", pageNo);
+        return "song/log";
+    }
+
     @RequestMapping("/test_task")
     public void testTask(){
         //songService.allotTask();

@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mac on 2017/8/23.
@@ -38,7 +39,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public Long insert(final User user, String[] ids) {
-        final String sql = "insert into user(email, trueName, tmpPwd, createTime, userType, effect, taskNumber, submitNumber, auditNumber, fatherId) values(?,?,?,?,?,?,?,?,?,?,?,?)";
+        final String sql = "insert into user(email, trueName, tmpPwd, createTime, userType, effect, taskNumber, submitNumber, auditNumber, auditTaskNumber, doneTaskNumber, fatherId) values(?,?,?,?,?,?,?,?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
@@ -87,6 +88,13 @@ public class UserDaoImpl extends BaseDao implements UserDao {
         if(userList != null && userList.size() > 0){
             User user = userList.get(0);
             user.setTagAuthList(selectUserTagAuth(String.valueOf(user.getId())));
+            Long fatherId = user.getFatherId();
+            if(fatherId != null){
+                User father = selectById(fatherId);
+                if(father != null){
+                    user.setFatherEmail(father.getEmail());
+                }
+            }
             return user;
         }
         return null;
@@ -115,6 +123,13 @@ public class UserDaoImpl extends BaseDao implements UserDao {
                     user.setUserTypeName("音乐分析师");
                 }
                 user.setTagAuthList(selectUserTagAuth(String.valueOf(user.getId())));
+                Long fatherId = user.getFatherId();
+                if(fatherId != null){
+                    User father = selectById(fatherId);
+                    if(father != null){
+                        user.setFatherEmail(father.getEmail());
+                    }
+                }
             }
         }
         page.setList(userList);
@@ -169,6 +184,12 @@ public class UserDaoImpl extends BaseDao implements UserDao {
     public void updateUserDoneTaskNumber(User user1) {
         String sql = "update user set doneTaskNumber = ? where id = ?;";
         jdbcTemplate.update(sql, user1.getDoneTaskNumber(), user1.getId());
+    }
+
+    @Override
+    public Map<String, Object> selectSonMsg(Long id) {
+        String sql = "select SUM(taskNumber) as taskNumber, SUM(submitNumber) as submitNumber, SUM(auditNumber) as auditNumber from user where fatherId = ?;";
+        return null;
     }
 
     @Override

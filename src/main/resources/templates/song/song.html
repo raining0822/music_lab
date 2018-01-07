@@ -107,12 +107,21 @@
                         <button th:if="${song.reasonTag == 1}" type="button" class="btn btn-primary btn-xs">理性</button>
                         <button th:if="${song.sensibilityTag == 1}" type="button" class="btn btn-info btn-xs">感性</button>
                     </td>
-                    <td><div th:if="${song.songStatus == 0}" >等待推送</div> <div th:if="${song.songStatus == 1}" >已推送</div> <div th:if="${song.songStatus == 2}" >已分配</div><div th:if="${song.songStatus == 3}" >待审核</div> <div th:if="${song.songStatus == 4}" >审核完毕</div> </td>
+                    <td>
+                        <div th:if="${song.songStatus == 0}" >等待推送</div>
+                        <div th:if="${song.songStatus == 1}" >已推送</div>
+                        <div th:if="${song.songStatus == 2}" >已分配</div>
+                        <div th:if="${song.songStatus == 3 or song.songStatus == 5}" >待审核</div>
+                        <div th:if="${song.songStatus == 4 or song.songStatus == 6}" >审核完毕
+                            <button th:if="${song.auditResult == 'OK'}" type="button" class="btn btn-success btn-xs" style="margin-top: 0px;">通过</button>
+                            <button th:if="${song.auditResult == 'PROBLEM'}" type="button" class="btn btn-warning btn-xs" style="margin-top: 0px;">有问题</button>
+                        </div>
+                    </td>
                     <td>
                         <a href="#" class="playSong" th:value="${song.id}">播放</a> |
-                        <a th:if="${song.songStatus == 4}" th:href="@{'/song/check/' + ${song.id} + '/' + ${keyword} + '/' + ${searchType} + '/' + ${pageNo}}" th:value="${song.id}">查看标签</a> |
-                        <a th:if="${song.songStatus == 0}" href="#" th:value="${song.id}">推送 <input type="checkbox" th:value="${song.id}"/></a>
-
+                        <a th:if="${song.songStatus == 4 || song.songStatus == 6}" th:href="@{'/song/check/' + ${song.id} + '/' + ${keyword} + '/' + ${searchType} + '/' + ${pageNo}}" th:value="${song.id}">审验标签</a> |
+                        <a th:if="${song.songStatus == 0 || song.songStatus == 6}" href="#" th:value="${song.id}">推送 <input type="checkbox" th:value="${song.id}"/></a> |
+                        <a href="#" th:href="@{'/song/log/' + ${song.id} + '/' + ${searchType} + '/' + ${keyword} + '/' + ${page.pageNo}}">查看日志</a>
                     </td>
                 </tr>
             </tbody>

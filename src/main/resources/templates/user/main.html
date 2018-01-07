@@ -54,9 +54,14 @@
         <div class="col-md-1">
             <div class="menu">
                 <ul>
-                    <li th:if="${session.loginUser.userType == 1 or session.loginUser.userType == 2}">
+                    <li th:if="${session.loginUser.userType == 2}">
                         <a class="btn btn-default btn-lg" href="/user/work/label" style="margin-top: 30px;" target="lava_main">
                              工作台
+                        </a>
+                    </li>
+                    <li th:if="${session.loginUser.userType == 1}">
+                        <a class="btn btn-default btn-lg" href="/user/work/audit" style="margin-top: 30px;" target="lava_main">
+                            工作台
                         </a>
                     </li>
                     <li th:if="${session.loginUser.userType == 0}">
@@ -74,12 +79,12 @@
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span> 账户
                         </a>
                     </li>
-                    <li th:if="${session.loginUser.userType == 1}">
+                    <li th:if="${session.loginUser.userType == 2}">
                         <a  class="btn btn-default btn-lg" href="/user/message/label" target="lava_main">
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span> 账户
                         </a>
                     </li>
-                    <li th:if="${session.loginUser.userType == 2}">
+                    <li th:if="${session.loginUser.userType == 1}">
                         <a  class="btn btn-default btn-lg" href="/user/message/audit" target="lava_main">
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span> 账户
                         </a>

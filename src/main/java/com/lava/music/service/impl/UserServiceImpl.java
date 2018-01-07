@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mac on 2017/8/23.
@@ -99,6 +100,11 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
+    public Map<String, Object> findSonMsg(Long id) {
+        return userDao.selectSonMsg(id);
+    }
+
+    @Override
     public User login(String email, String userPwd) {
         User user = userDao.selectByEmailAndUserPwd(email,CommonUtil.MD5(userPwd));
         return user;
@@ -173,7 +179,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public Integer submit(Long songId, Long userId) {
+    public Integer submit(Long songId, Long userId, List<Label> songLabels) {
         Song song = songDao.selectById(songId);
         if(song.getSongStatus() == 2){
             song.setSongStatus(3);
@@ -187,6 +193,15 @@ public class UserServiceImpl extends BaseService implements UserService {
             songRecord.setCreateTime(new Date());
             songRecord.setUserId(userId);
             songRecord.setSongId(songId);
+            StringBuffer stringBuffer = new StringBuffer();
+            for(Label label : songLabels){
+                stringBuffer.append(label.getId()).append(",");
+            }
+            stringBuffer.append("|");
+            for(Label label : songLabels){
+                stringBuffer.append(label.getLabelName()).append(",");
+            }
+            songRecord.setMetaData(stringBuffer.toString());
             songRecordDao.insert(songRecord);
             return num;
         }

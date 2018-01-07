@@ -355,8 +355,9 @@ public class UserController {
     public String userMessageAudit(ModelMap modelMap, HttpServletRequest request){
         HttpSession session = request.getSession();
         User loginUser = (User) session.getAttribute("loginUser");
-        //User user = userService.findUserAuditMsg(loginUser);
-        //modelMap.addAttribute("user", user);
+        User user = userService.findById(String.valueOf(loginUser.getId()));
+        modelMap.addAttribute("user", user);
+        Map<String ,Object> sonMsg = userService.findSonMsg(user.getId());
         return "user/audit_info";
     }
 
@@ -475,7 +476,7 @@ public class UserController {
         if(songLabels.size() < 1){
             return "no_label";
         }
-        Integer number = userService.submit(Long.valueOf(songId), user.getId());
+        Integer number = userService.submit(Long.valueOf(songId), user.getId(), songLabels);
         return "success";
     }
 

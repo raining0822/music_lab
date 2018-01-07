@@ -30,7 +30,7 @@
                 <input type="password" class="form-control" id="newPwd2" name="newPwd2" placeholder="再次输入新密码"/>
             </div>
 
-            <button type="submit" class="btn btn-primary">提  交</button>
+            <button type="button" id="tmpPwdBtn" class="btn btn-primary">提  交</button>
         </form>
     </div>
     <div class="row"></div>
@@ -38,6 +38,29 @@
 
 <script th:src="@{/js/jquery.min.1.12.4.js}" src="/js/jquery.min.1.12.4.js" ></script>
 <script th:src="@{/js/bootstrap.min.js}" src="/js/bootstrap.min.js" ></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    (function($){
+        $(function(){
+            $("#tmpPwdBtn").on("click", function(){
+                var newPwd = $("#newPwd").val();
+                var newPwd2 = $("#newPwd2").val();
+                if($.trim(newPwd) == '' || $.trim(newPwd2) == ''){
+                    alert("密码能为空！");
+                    return;
+                }
+                if(newPwd != newPwd2){
+                    alert("两次密码不一致！");
+                    return;
+                }
+                $("form").submit();
+            });
 
+
+
+        });
+    })(jQuery);
+    /*]]>*/
+</script>
 </body>
 </html>

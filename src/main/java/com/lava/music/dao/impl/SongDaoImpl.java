@@ -88,7 +88,7 @@ public class SongDaoImpl extends BaseDao implements SongDao {
 
     @Override
     public void back() {
-        String sql = "update song set songStatus = 0 where songStatus = 4;";
+        String sql = "update song set songStatus = 6 where songStatus = 4;";
         jdbcTemplate.update(sql);
     }
 

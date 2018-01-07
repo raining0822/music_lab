@@ -8,9 +8,11 @@ import java.util.Date;
 public class SongRecord {
 
     public static final Integer PUSH_SONG = 1;
-    public static final Integer PULL_SONG = 2;
+    public static final Integer TASK_SONG = 2;
+    public static final Integer AUDIT_TASK_SONG = 5;
     public static final Integer SUBMIT_SONG = 3;
     public static final Integer AUDIT_SONG = 4;
+
 
     private Long id;
     private Long songId;
