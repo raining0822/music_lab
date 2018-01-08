@@ -20,10 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by mac on 2017/8/23.
@@ -189,7 +186,13 @@ public class UserDaoImpl extends BaseDao implements UserDao {
     @Override
     public Map<String, Object> selectSonMsg(Long id) {
         String sql = "select SUM(taskNumber) as taskNumber, SUM(submitNumber) as submitNumber, SUM(auditNumber) as auditNumber from user where fatherId = ?;";
-        return null;
+        return jdbcTemplate.queryForMap(sql, id);
+    }
+
+    @Override
+    public Integer selectUserDoneCount(String userId) {
+        String sql = "SELECT COUNT(songId) FROM song_record WHERE songId IN(SELECT songId FROM song_record WHERE metaData = ?) AND `action` = '4';";
+        return jdbcTemplate.queryForObject(sql, Integer.class,userId);
     }
 
     @Override

@@ -52,4 +52,6 @@ public interface UserDao {
     void updateUserDoneTaskNumber(User user1);
 
     Map<String,Object> selectSonMsg(Long id);
+
+    Integer selectUserDoneCount(String userId);
 }

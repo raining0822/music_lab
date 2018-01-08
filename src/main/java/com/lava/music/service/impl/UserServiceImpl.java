@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -102,6 +103,15 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public Map<String, Object> findSonMsg(Long id) {
         return userDao.selectSonMsg(id);
+    }
+
+    @Override
+    public User findUserMsg(String userId) {
+
+        Integer doneCount = userDao.selectUserDoneCount(userId);
+        User user = userDao.selectById(Long.valueOf(userId));
+        user.setDoneNumber(doneCount);
+        return user;
     }
 
     @Override

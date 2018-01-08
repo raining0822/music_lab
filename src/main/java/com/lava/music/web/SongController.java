@@ -348,7 +348,11 @@ public class SongController {
 
     @RequestMapping("/test_task")
     public void testTask(){
-        //songService.allotTask();
+        songService.allotTask();
+    }
+
+    @RequestMapping("/test_audit_task")
+    public void testAuditTask(){
         songService.allotAuditTask();
     }
 }

@@ -18,10 +18,19 @@ public class User {
     private String userTypeName;
     private Integer taskNumber;
     private Integer submitNumber;
+    private Integer doneNumber;
     private Integer auditNumber;
     private Integer auditTaskNumber;
     private Integer doneTaskNumber;
     private String fatherEmail;
+
+    public Integer getDoneNumber() {
+        return doneNumber;
+    }
+
+    public void setDoneNumber(Integer doneNumber) {
+        this.doneNumber = doneNumber;
+    }
 
     public String getFatherEmail() {
         return fatherEmail;

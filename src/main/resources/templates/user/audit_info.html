@@ -25,6 +25,9 @@
         <h3><span class="label label-primary" th:text="${'邮箱：' + user.email}">Primary</span></h3>
         <h3><span class="label label-success" th:text="${'总计接到审核任务：' + user.auditTaskNumber + '个'}">Primary</span></h3>
         <h3><span class="label label-danger" th:text="${'总计审核任务：' + user.doneTaskNumber + '个'}">Primary</span></h3>
+        <h3><span class="label label-info" th:text="${'子账户总计收到单曲任务：' + sonMsg.taskNumber + '个'}">Primary</span></h3>
+        <h3><span class="label label-info" th:text="${'子账户总计提交审核任务：' + sonMsg.submitNumber + '个'}">Primary</span></h3>
+        <h3><span class="label label-info" th:text="${'子账户总计正确任务：' + sonMsg.auditNumber + '个'}">Primary</span></h3>
     </div>
     <div class="row"></div>
 </div>

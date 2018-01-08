@@ -55,4 +55,6 @@ public interface UserService {
     User addUser(String email, String trueName, Long fatherId, Integer userType, String userAuthority);
 
     Map<String,Object> findSonMsg(Long id);
+
+    User findUserMsg(String userId);
 }

@@ -327,7 +327,11 @@ public class UserController {
      */
     @RequestMapping("/info/{userId}")
     public String userInfo(@PathVariable String userId, ModelMap modelMap){
-        User user = userService.findById(userId);
+        User user = userService.findUserMsg(userId);
+        if(user != null && user.getUserType() == 1){
+            Map<String, Object> map = userService.findSonMsg(user.getId());
+            modelMap.addAttribute("sonMsg", map);
+        }
         modelMap.addAttribute("user", user);
         return "user/info";
     }
@@ -358,6 +362,7 @@ public class UserController {
         User user = userService.findById(String.valueOf(loginUser.getId()));
         modelMap.addAttribute("user", user);
         Map<String ,Object> sonMsg = userService.findSonMsg(user.getId());
+        modelMap.addAttribute("sonMsg", sonMsg);
         return "user/audit_info";
     }
 

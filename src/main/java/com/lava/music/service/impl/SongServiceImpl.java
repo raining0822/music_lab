@@ -198,6 +198,7 @@ public class SongServiceImpl extends BaseService implements SongService {
             user.setAuditNumber(user.getAuditNumber() + 1);
             userDao.updateUserAuditNumber(user);
             auditSong.setAuditResult("OK");
+            songNewLabels = labelDao.selectLabelBySongId(songId);
         }else{
             songDao.addLabels(Long.valueOf(songId), labelIds);
             //刷新单曲的标签权限标识
@@ -468,14 +469,9 @@ public class SongServiceImpl extends BaseService implements SongService {
                 users.remove(father);
                 User user1 = check(fathers, father);
                 if(user1 != null){
-                    if(user1.getAuditTaskNumber() == null){
-                        user1.setAuditTaskNumber(0);
-                    }
                     user1.setAuditTaskNumber(user1.getAuditTaskNumber() + 1);
                 }else{
-                    if(father.getAuditTaskNumber() == null){
-                        father.setAuditTaskNumber(0);
-                    }
+                    father.setAuditTaskNumber(1);
                     fathers.add(father);
                 }
             }
@@ -501,7 +497,7 @@ public class SongServiceImpl extends BaseService implements SongService {
                         Integer reasonTag = song.getReasonTag();
                         Integer sensibilityTag = song.getSensibilityTag();
                         Boolean flag = false;
-                        if((basicTag != null && basicTag == 1) && !flag){
+                        if((basicTag == 1) && !flag){
                             for(TagAuth tagAuth : tagAuthList){
                                 if(tagAuth.getName().trim().equals("基础")){
                                     song.setAuditUserId(user.getId());
@@ -520,7 +516,7 @@ public class SongServiceImpl extends BaseService implements SongService {
                                 }
                             }
                         }
-                        if((reasonTag != null || reasonTag == 1) && !flag){
+                        if((reasonTag == 1) && !flag){
                             for(TagAuth tagAuth : tagAuthList){
                                 if(tagAuth.getName().trim().equals("理性")){
                                     song.setAuditUserId(user.getId());
@@ -539,7 +535,7 @@ public class SongServiceImpl extends BaseService implements SongService {
                                 }
                             }
                         }
-                        if((sensibilityTag != null || sensibilityTag == 1) && !flag){
+                        if((sensibilityTag == 1) && !flag){
                             for(TagAuth tagAuth : tagAuthList){
                                 if(tagAuth.getName().trim().equals("感性")){
                                     song.setAuditUserId(user.getId());
@@ -564,9 +560,6 @@ public class SongServiceImpl extends BaseService implements SongService {
                     songDao.updateSongsOfAudit(taskList);
                     //更新审核任务领取数量
                     List<User> users1 = new ArrayList<User>();
-                    if(user.getAuditTaskNumber() == null){
-                        user.setAuditTaskNumber(0);
-                    }
                     user.setAuditTaskNumber(user.getAuditTaskNumber() + taskList.size());
                     users1.add(user);
                     userDao.updateUserAuditTaskNumber(users1);
