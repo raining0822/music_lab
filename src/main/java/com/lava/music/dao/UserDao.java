@@ -54,4 +54,6 @@ public interface UserDao {
     Map<String,Object> selectSonMsg(Long id);
 
     Integer selectUserDoneCount(String userId);
+
+    List<User> selectSonList(Long id);
 }

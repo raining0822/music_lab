@@ -196,6 +196,13 @@ public class UserDaoImpl extends BaseDao implements UserDao {
     }
 
     @Override
+    public List<User> selectSonList(Long id) {
+        String sql = "select * from user where fatherId = ?;";
+        RowMapper<User> userRowMapper = new BeanPropertyRowMapper<User>(User.class);
+        return jdbcTemplate.query(sql, userRowMapper, id);
+    }
+
+    @Override
     public User selectByUserName(String userName) {
         String sql = "select * from user where userName = ?;";
         RowMapper<User> userRowMapper = new BeanPropertyRowMapper<User>(User.class);

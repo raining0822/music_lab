@@ -346,13 +346,28 @@ public class SongController {
         return "song/log";
     }
 
-    @RequestMapping("/test_task")
-    public void testTask(){
+    @RequestMapping("/action_task")
+    public void actionTask(){
         songService.allotTask();
     }
 
-    @RequestMapping("/test_audit_task")
-    public void testAuditTask(){
+    @RequestMapping("/action_audit_task")
+    public void actionAuditTask(){
         songService.allotAuditTask();
+    }
+
+    @RequestMapping("/action_back")
+    public void actionBack(){
+        songService.back();
+    }
+
+    @RequestMapping("/init_song_tag")
+    public void initSongLabelTag(){
+        songService.initSongTag();
+    }
+
+    @RequestMapping("/push_diy_song")
+    public void pushDIYSong(){
+        songService.pushDIYSong();
     }
 }

@@ -18,4 +18,6 @@ public interface SongRecordDao {
 
     List<SongRecord> selectBySongId(Long songId);
     List<Map<String, Object>> selectSongMsg(Long songId);
+
+    List<SongRecord> selectSongRecord(Long songId, Integer action);
 }

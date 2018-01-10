@@ -87,9 +87,30 @@ public class SongDaoImpl extends BaseDao implements SongDao {
     }
 
     @Override
-    public void back() {
-        String sql = "update song set songStatus = 6 where songStatus = 4;";
-        jdbcTemplate.update(sql);
+    public void back(List<Song> taskList) {
+        String sql = "update song set songStatus = ? where id = ?;";
+        List<Object[]> params = new ArrayList<Object[]>();
+        for(Song song : taskList){
+            params.add(new Object[]{song.getSongStatus(), song.getId()});
+        }
+        jdbcTemplate.batchUpdate(sql, params);
+    }
+
+    @Override
+    public void flushSongTag(List<Song> taskList) {
+        String sql = "update song set basicTag = ?, reasonTag = ?, sensibilityTag = ? where id = ?;";
+        List<Object[]> params = new ArrayList<Object[]>();
+        for(Song song : taskList){
+            params.add(new Object[]{song.getBasicTag(), song.getReasonTag(), song.getSensibilityTag(), song.getId()});
+        }
+        jdbcTemplate.batchUpdate(sql, params);
+    }
+
+    @Override
+    public List<Song> selectByArtistName(String tmp) {
+        String sql = "select * from song where artistName = ?;";
+        RowMapper<Song> songRowMapper = new BeanPropertyRowMapper<Song>(Song.class);
+        return jdbcTemplate.query(sql, songRowMapper,tmp);
     }
 
     @Override

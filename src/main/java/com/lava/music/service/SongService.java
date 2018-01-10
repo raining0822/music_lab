@@ -49,4 +49,8 @@ public interface SongService {
     Page<Song> findSongBySearchPage(Page<Song> page, String keyword, Integer searchType);
 
     void back();
+
+    void initSongTag();
+
+    void pushDIYSong();
 }

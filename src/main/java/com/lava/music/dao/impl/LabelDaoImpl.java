@@ -100,6 +100,7 @@ public class LabelDaoImpl extends BaseDao implements LabelDao {
     @Override
     public List<Label> findByFatherId(Long fatherId) {
         String sql = "select * from label where fatherId = ? and effect = 1 order by labelNo asc;";
+        //String sql = "select * from label where fatherId = ? order by labelNo asc;";
         RowMapper<Label> labelRowMapper = new BeanPropertyRowMapper<Label>(Label.class);
         return jdbcTemplate.query(sql, labelRowMapper, fatherId);
     }

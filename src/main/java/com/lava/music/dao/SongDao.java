@@ -64,5 +64,9 @@ public interface SongDao {
 
     Page<Song> selectSearchBySearch(Page<Song> page, String keyword, Integer searchType);
 
-    void back();
+    void back(List<Song> taskList);
+
+    void flushSongTag(List<Song> taskList);
+
+    List<Song> selectByArtistName(String tmp);
 }

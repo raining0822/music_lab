@@ -54,12 +54,19 @@ public class SongRecordDaoImpl extends BaseDao implements SongRecordDao {
     @Override
     public List<SongRecord> selectBySongId(Long songId) {
         String sql = "select * from song_record where songId = ? order by createTime ASC ;";
-        RowMapper<SongRecord> songRecordRowMapper = new BeanPropertyRowMapper<SongRecord>();
+        RowMapper<SongRecord> songRecordRowMapper = new BeanPropertyRowMapper<SongRecord>(SongRecord.class);
         return jdbcTemplate.query(sql, songRecordRowMapper, songId);
     }
 
     public List<Map<String, Object>> selectSongMsg(Long songId){
         String sql = "select sr.songId,s.songName,u.userType,u.email,sr.userId,sr.createTime, sr.action, sr.metaData,u1.email as dataEmail from song_record as sr left join song as s on sr.songId = s.id left join user as u on sr.userId = u.id left join user as u1 on sr.metaData = u1.id  where sr.songId = ?;";
         return jdbcTemplate.queryForList(sql, songId);
+    }
+
+    @Override
+    public List<SongRecord> selectSongRecord(Long songId, Integer action) {
+        String sql = "SELECT * FROM song_record WHERE songId = ? AND `action` = ? ORDER BY createTime DESC LIMIT 1;";
+        RowMapper<SongRecord> songRecordRowMapper = new BeanPropertyRowMapper<SongRecord>(SongRecord.class);
+        return jdbcTemplate.query(sql, songRecordRowMapper, songId, action);
     }
 }

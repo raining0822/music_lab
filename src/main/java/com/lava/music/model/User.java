@@ -190,5 +190,4 @@ public class User {
     public void setUserPwd(String userPwd) {
         this.userPwd = userPwd;
     }
-
 }
