@@ -478,7 +478,7 @@ public class SongServiceImpl extends BaseService implements SongService {
                                 }
                             }
                         }
-                        if(songCount >= 150)break;
+                        if(songCount >= 75)break;
                     }
                     //批量刷新任务
                     songDao.updateSongs(taskList);
