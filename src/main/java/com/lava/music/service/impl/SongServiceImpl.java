@@ -327,12 +327,12 @@ public class SongServiceImpl extends BaseService implements SongService {
             user.setAuditNumber(user.getAuditNumber() + 1);
             userDao.updateUserAuditNumber(user);
             auditSong.setAuditResult("OK");
-            songNewLabels = labelDao.selectLabelBySongId(songId);
         }else{
             songDao.addLabels(Long.valueOf(songId), labelIds);
             flushSongTag(Long.valueOf(songId));
             auditSong.setAuditResult("PROBLEM");
         }
+        songNewLabels = labelDao.selectLabelBySongId(songId);
         //修改单曲状态为审核已通过
         auditSong.setSongStatus(Song.AUDITED);
         songDao.updateSongStatus(auditSong);

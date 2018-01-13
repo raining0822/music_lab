@@ -17,16 +17,16 @@ public class TimeTask {
 
     @Scheduled(fixedRate = 1000*60*60*12)
     public void allotLabelTask(){
-        //songService.allotTask();
+        songService.allotTask();
     }
 
     @Scheduled(fixedRate = 1000*60*60*3)
     public void allAuditTask(){
-        //songService.allotAuditTask();
+        songService.allotAuditTask();
     }
 
     @Scheduled(fixedRate = 1000*60*60*24)
     public void back(){
-        //songService.back();
+        songService.back();
     }
 }
