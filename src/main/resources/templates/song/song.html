@@ -118,7 +118,7 @@
                         </div>
                     </td>
                     <td>
-                        <a href="#" class="playSong" th:value="${song.id}">播放</a> |
+                        <a href="javascript:void(0);" class="playSong" th:value="${song.id}">播放</a> |
                         <a th:if="${song.songStatus == 4 || song.songStatus == 6}" th:href="@{'/song/check/' + ${song.id} + '/' + ${keyword} + '/' + ${searchType} + '/' + ${pageNo}}" th:value="${song.id}">审验标签</a> |
                         <a th:if="${song.songStatus == 0}" href="#" th:value="${song.id}">推送 <input type="checkbox" th:value="${song.id}"/></a> |
                         <a href="#" th:href="@{'/song/log/' + ${song.id} + '/' + ${searchType} + '/' + ${keyword} + '/' + ${page.pageNo}}">查看日志</a>

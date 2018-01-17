@@ -95,7 +95,7 @@
                     <td><div style="height: 23px; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;" th:text="${song.artistName}"></div></td>
                     <td ><div style="height: 23px; overflow: hidden;" th:value="${song.id}"  class="songLabel"></div></td>
                     <td>
-                        <a href="#" class="playSong" th:value="${song.id}">播放</a> |
+                        <a href="javascript:void(0);" class="playSong" th:value="${song.id}">播放</a> |
                         <a th:href="@{'/song/label/' + ${song.id}} + '/' + ${page.pageNo}"  href="/song/label">打标签</a>
                     </td>
                 </tr>
