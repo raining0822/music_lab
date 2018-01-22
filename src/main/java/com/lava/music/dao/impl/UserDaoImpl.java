@@ -68,7 +68,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public Integer delById(Long id) {
-        String sql = "update user set effect = 0 where id = ?;";
+        String sql = "update user set effect = 0, userPwd = NULL where id = ?;";
         return jdbcTemplate.update(sql, id);
     }
 
@@ -251,7 +251,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public List<User> selectUserByType(int userType) {
-        String sql = "select * from user where userType = ?;";
+        String sql = "select * from user where userType = ? and effect = 1;";
         RowMapper<User> userRowMapper = new BeanPropertyRowMapper<User>(User.class);
         return jdbcTemplate.query(sql,userRowMapper, userType);
     }
